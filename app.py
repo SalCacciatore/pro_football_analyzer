@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 
 
 # %%
-YEARS = [2021, 2022, 2023,2024]
+YEARS = [2023,2024]
 
 
 with open('yardage_model.pkl', 'rb') as file:
