@@ -197,7 +197,7 @@ for game in current_szn['game_id'].unique():
         throws = offense['complete_pass'].sum() + offense['incomplete_pass'].sum() + offense['interception'].sum()
         team_air_yards = offense['air_yards'].sum()
 
-        receivers = offense.groupby(['receiver_player_name','posteam','game_id','week'])[['pass','fantasy_points','xFPs', 'complete_pass','cp', 'yards_gained','xYards', 'air_yards', 'goal_to_go','touchdown','xTDs','end_zone_target']].sum()
+        receivers = offense.groupby(['receiver_player_name','posteam','game_id','week'])[['pass','fantasy_points','xFPs', 'complete_pass','cp', 'yards_gained','xYards', 'air_yards', 'touchdown','xTDs','end_zone_target']].sum()
         receivers['team_attempts'] = throws
         receivers['team_air_yards'] = team_air_yards
         game_by_game_receivers = pd.concat([game_by_game_receivers,receivers])
@@ -214,7 +214,7 @@ game_by_game_receivers['WOPR'] = 1.5 * game_by_game_receivers['target_share'] + 
 
 
 # %%
-szn_receivers = game_by_game_receivers.reset_index().groupby(['receiver_player_name','posteam'])[['targets', 'fantasy_points','xFPs','complete_pass','cp', 'yards_gained','xYards', 'air_yards', 'goal_to_go','touchdown','xTDs','end_zone_target','team_attempts','team_air_yards']].sum()
+szn_receivers = game_by_game_receivers.reset_index().groupby(['receiver_player_name','posteam'])[['targets', 'fantasy_points','xFPs','complete_pass','cp', 'yards_gained','xYards', 'air_yards', 'touchdown','xTDs','end_zone_target','team_attempts','team_air_yards']].sum()
 szn_receivers['target_share'] = round(szn_receivers['targets']/szn_receivers['team_attempts'],3)
 szn_receivers['air_yards_share'] = round(szn_receivers['air_yards']/szn_receivers['team_air_yards'],3)
 szn_receivers['WOPR'] = round(1.5 * szn_receivers['target_share'] + 0.7 * szn_receivers['air_yards_share'],3)
