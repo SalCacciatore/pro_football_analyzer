@@ -1363,7 +1363,7 @@ def get_team_stats(team, year):
     
     
     
-    data = data_df[(data_df['season'] == year) & (data_df['season_type'] == 'REG')]
+    data = data[(data['season'] == year) & (data['season_type'] == 'REG')]
 
 
 
