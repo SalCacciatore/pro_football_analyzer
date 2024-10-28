@@ -190,7 +190,7 @@ def wp_graph(dataframe, game_id):
     return fig
 
 @st.cache_data
-def process_receivers_data(data, yardage_model, touchdown_model):
+def process_receivers_data(data, _yardage_model, touchdown_model):
     game_by_game_receivers = pd.DataFrame()
     current_szn = data[data['season'] == 2024]
 
