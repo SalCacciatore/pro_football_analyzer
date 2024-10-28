@@ -79,7 +79,7 @@ def process_data(data, yardage_model, touchdown_model):
             throws = offense[['complete_pass', 'incomplete_pass', 'interception']].sum().sum()
             team_air_yards = offense['air_yards'].sum()
 
-            receivers = offense.groupby(['receiver_player_name', 'posteam', 'game_id', 'week'])[['pass', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'goal_to_go', 'touchdown', 'xTDs', 'end_zone_target']].sum()
+            receivers = offense.groupby(['receiver_player_name', 'posteam', 'game_id', 'week'])[['pass', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'touchdown', 'xTDs', 'end_zone_target']].sum()
             receivers['team_attempts'] = throws
             receivers['team_air_yards'] = team_air_yards
             
@@ -98,7 +98,7 @@ def process_data(data, yardage_model, touchdown_model):
 # Aggregating season receivers
 #@st.cache_data
 def aggregate_season_receivers(game_by_game_receivers):
-    szn_receivers = game_by_game_receivers.reset_index().groupby(['receiver_player_name', 'posteam'])[['targets', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'goal_to_go', 'touchdown', 'xTDs', 'end_zone_target', 'team_attempts', 'team_air_yards']].sum()
+    szn_receivers = game_by_game_receivers.reset_index().groupby(['receiver_player_name', 'posteam'])[['targets', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'touchdown', 'xTDs', 'end_zone_target', 'team_attempts', 'team_air_yards']].sum()
     
     szn_receivers['target_share'] = round(szn_receivers['targets'] / szn_receivers['team_attempts'], 3)
     szn_receivers['air_yards_share'] = round(szn_receivers['air_yards'] / szn_receivers['team_air_yards'], 3)
