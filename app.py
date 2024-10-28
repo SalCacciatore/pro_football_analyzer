@@ -66,10 +66,10 @@ def process_data(data, yardage_model, touchdown_model):
     })
 
 # Concatenate the new columns to the current_szn DataFrame
-    current_szn = pd.concat([current_szn, new_columns_current], axis=1)
+    #current_szn = pd.concat([current_szn, new_columns_current], axis=1)
     
     
-    #current_szn = pd.concat([current_szn.reset_index(drop=True), new_columns_current], axis=1)
+    current_szn = pd.concat([current_szn.reset_index(drop=True), new_columns_current], axis=1)
 
     # Calculate fantasy points
     data['fantasy_points'] = (
