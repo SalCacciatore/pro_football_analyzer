@@ -118,7 +118,7 @@ data_all = load_and_process_data()[1]
 
 
 @st.cache_data
-def preprocess_data(df):
+def preprocess_time(df):
     # Vectorized calculation of seconds
     df['second#'] = np.where(
         df['qtr'] != 5,
@@ -166,7 +166,7 @@ data = preprocess_data(load_play_by_play([2023, 2024]))
 @st.cache_data
 def wp_graph(dataframe, game_id):
     df = dataframe[dataframe['game_id'] == game_id].copy()
-    df = preprocess_data(df)
+    df = preprocess_time(df)
     host, visitor = df['home_team'].max(), df['away_team'].max()
     week = df['week'].max()
     df['quarter_marker'] = df.apply(get_quarter_value, axis=1)
