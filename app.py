@@ -78,10 +78,12 @@ def load_and_process_data():
     })
 
     # Concatenate new columns to the original DataFrame
-    return pd.concat([data, new_columns_data], axis=1)
+    return pd.concat([data, new_columns_data], axis=1), data_all
 
 # Load and process data using the cached function
-data = load_and_process_data()
+data = load_and_process_data()[0]
+data_all = load_and_process_data()[1]
+
 
 
 
@@ -230,16 +232,40 @@ game_by_game_receivers = process_receivers_data(data, yardage_model, touchdown_m
 
 
 # %%
-szn_receivers = game_by_game_receivers.reset_index().groupby(['receiver_player_name','posteam'])[['targets', 'fantasy_points','xFPs','complete_pass','cp', 'yards_gained','xYards', 'air_yards', 'touchdown','xTDs','end_zone_target','team_attempts','team_air_yards']].sum()
-szn_receivers['target_share'] = round(szn_receivers['targets']/szn_receivers['team_attempts'],3)
-szn_receivers['air_yards_share'] = round(szn_receivers['air_yards']/szn_receivers['team_air_yards'],3)
-szn_receivers['WOPR'] = round(1.5 * szn_receivers['target_share'] + 0.7 * szn_receivers['air_yards_share'],3)
-szn_receivers['aDOT'] = round(szn_receivers['air_yards']/szn_receivers['targets'],1)
-szn_receivers[['xFPs', 'xYards', 'xTDs','cp']] = szn_receivers[['xFPs', 'xYards', 'xTDs','cp']].round(1)
+@st.cache_data
+def calculate_szn_receivers(game_by_game_receivers):
+    # Group by 'receiver_player_name' and 'posteam' with sum aggregations
+    grouped = game_by_game_receivers.groupby(['receiver_player_name', 'posteam']).agg({
+        'targets': 'sum',
+        'fantasy_points': 'sum',
+        'xFPs': 'sum',
+        'complete_pass': 'sum',
+        'cp': 'sum',
+        'yards_gained': 'sum',
+        'xYards': 'sum',
+        'air_yards': 'sum',
+        'touchdown': 'sum',
+        'xTDs': 'sum',
+        'end_zone_target': 'sum',
+        'team_attempts': 'sum',
+        'team_air_yards': 'sum'
+    }).reset_index()
 
+    # Calculate new columns in a vectorized way
+    grouped['target_share'] = grouped['targets'] / grouped['team_attempts']
+    grouped['air_yards_share'] = grouped['air_yards'] / grouped['team_air_yards']
+    grouped['WOPR'] = 1.5 * grouped['target_share'] + 0.7 * grouped['air_yards_share']
+    grouped['aDOT'] = grouped['air_yards'] / grouped['targets']
 
-# %%
-szn_receivers = szn_receivers.sort_values('WOPR',ascending=False).reset_index()
+    # Round only once at the end for all relevant columns
+    grouped[['target_share', 'air_yards_share', 'WOPR', 'aDOT', 'xFPs', 'xYards', 'xTDs', 'cp']] = grouped[
+        ['target_share', 'air_yards_share', 'WOPR', 'aDOT', 'xFPs', 'xYards', 'xTDs', 'cp']
+    ].round({'target_share': 3, 'air_yards_share': 3, 'WOPR': 3, 'aDOT': 1, 'xFPs': 1, 'xYards': 1, 'xTDs': 1, 'cp': 1})
+
+    # Sort by 'WOPR' descending and reset the index
+    return grouped.sort_values('WOPR', ascending=False).reset_index(drop=True)
+
+szn_receivers = calculate_szn_receivers(game_by_game_receivers)
 
 #szn_receivers.head(50)
 
