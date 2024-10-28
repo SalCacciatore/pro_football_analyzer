@@ -7,223 +7,217 @@ import pickle
 
 import plotly.graph_objects as go
 
+import streamlit as st
+import pandas as pd
+import pickle
 
-
-# %%
-YEARS = [2021, 2022, 2023,2024]
-
-
-with open('yardage_model.pkl', 'rb') as file:
-    yardage_model = pickle.load(file)
-
-
-with open('touchdown_model.pkl', 'rb') as file:
-    touchdown_model = pickle.load(file)
-
-
-
-
-# %%
-data_all = pd.DataFrame()
-
-def calculate_seconds(row):
-    if row['qtr'] != 5:
-        return 3600 - row['game_seconds_remaining']
-    else:
-        return 600 - row['game_seconds_remaining'] + 3600
-
-
-def get_quarter_value(dataf):
-    if 'END QUARTER' in dataf['desc']:
-        return dataf['level_0']
-    else:
-        return None
-
-for i in YEARS:  
-    i_data = pd.read_csv('https://github.com/nflverse/nflverse-data/releases/download/pbp/' \
-                   'play_by_play_' + str(i) + '.csv.gz',
-                   compression= 'gzip', low_memory= False)
-
-    data_all = pd.concat([data_all,i_data])
-
-
-#data = data_all.loc[data_all.season_type=='REG']
-data = data_all.loc[(data_all.play_type.isin(['no_play','pass','run'])) & (data_all.epa.isna()==False)]
-data.loc[data['pass']==1, 'play_type'] = 'pass'
-data.loc[data.rush==1, 'play_type'] = 'run'
-data.reset_index(drop=True, inplace=True)
-#data.loc[:, 'turnover'] = data['interception'] + data['fumble_lost']
-data = data.dropna(subset=['posteam'])
-#data['goal_to_go'] = (data['yardline_100'] < 10).astype(int)
-
-
-new_columns_data = pd.DataFrame({
-    'turnover': data['interception'] + data['fumble_lost'],
-    '20+_play': (data['yards_gained'] > 19).astype(int),
-    'short_pass': (data['air_yards'] < 10).astype(int),
-    'medium_pass': ((data['air_yards'] > 9) & (data['air_yards'] < 20)).astype(int),
-    'deep_pass': (data['air_yards'] > 19).astype(int),
-    'fantasy_points': (
-        data['complete_pass'] * 1 +  # 1 point per completion
-        data['touchdown'] * 6 +       # 6 points per touchdown
-        data['yards_gained'] * 0.1     # 0.1 points per yard gained
-    ),
-    'end_zone_target': (data['yardline_100'] - data['air_yards']) <= 0,
-    'distance_to_EZ_after_target': data['yardline_100'] - data['air_yards'],
-    'goal_to_go': (data['yardline_100'] < 10).astype(int)
-})
-# Concatenate the new columns to the original DataFrame
-data = pd.concat([data, new_columns_data], axis=1)
-
-
-
-
-#data['20+_play'] = (data['yards_gained'] > 19).astype(int)
-#data['short_pass'] = (data['air_yards'] < 10).astype(int)
-#data['medium_pass'] = ((data['air_yards'] > 9)&(data['air_yards']<20)).astype(int)
-#data['deep_pass'] = (data['air_yards'] > 19).astype(int)
-
-
-
-#data_all = pd.read_csv('fill_in_all.csv')
-#data = pd.read_csv('fill_in.csv')
-
-# %%
-#data_all['season'].unique()
-
-# %%
-#df = pd.DataFrame()
-#for game in tqdm.tqdm(data['game_id'].unique()):
- #   current_game = data[data['game_id']==game]
- #   host = current_game['home_team'].max()
- #   visitor = current_game['away_team'].max()
- #   home_score = current_game['home_score'].max()
- #   away_score = current_game['away_score'].max()
- #   score_dict = {host:home_score,visitor:away_score}
- #   current_game['total_points'] = current_game['posteam'].map(score_dict)
- #   df = pd.concat([df,current_game])
-
-# %%
-#data = df.copy()
-
-def wp_graph(dataframe,game_id):
-    df = dataframe[dataframe['game_id']==game_id]
+# Caching models
+#@st.cache_resource
+def load_models():
+    with open('yardage_model.pkl', 'rb') as file:
+        yardage_model = pickle.load(file)
     
-    df['second#'] = df.apply(calculate_seconds, axis=1)
+    with open('touchdown_model.pkl', 'rb') as file:
+        touchdown_model = pickle.load(file)
 
-    df['minute#'] = df['second#']/60
+    return yardage_model, touchdown_model
 
+
+
+
+# Caching function for predictions
+#@st.cache_data
+def predict_columns(data, yardage_model, touchdown_model):
+    new_predictors = [
+        'air_yards', 'yardline_100', 'ydstogo',
+        'down', 'pass_location', 'season', 'qb_hit', 'end_zone_target', 'distance_to_EZ_after_target'
+    ]
+    
+    new_X = data[new_predictors]
+    new_X = pd.get_dummies(new_X, columns=['pass_location'], drop_first=True)
+    
+    # Perform predictions
+    predictions = {
+        'xYards': yardage_model.predict(new_X),
+        'xTDs': touchdown_model.predict(new_X),
+        'xFPs': (yardage_model.predict(new_X) * 0.1) + (touchdown_model.predict(new_X) * 6) + data['cp']
+    }
+    
+    return pd.DataFrame(predictions)
+
+# Main processing function
+#@st.cache_data
+def process_data(data, yardage_model, touchdown_model):
+    rec_data = data[data['air_yards'].notna() & data['receiver_player_name'].notna()]
+    current_szn = rec_data[rec_data['season'] == 2024]
+
+    # Get predictions and concatenate with current_szn
+    new_columns_current = predict_columns(current_szn, yardage_model, touchdown_model)
+    current_szn = pd.concat([current_szn.reset_index(drop=True), new_columns_current], axis=1)
+
+    # Calculate fantasy points
+    data['fantasy_points'] = (
+        data['complete_pass'] * 1 +          # 1 point per completion
+        data['touchdown'] * 6 +               # 6 points per touchdown
+        data['yards_gained'] * 0.1            # 0.1 points per yard gained
+    )
+
+    # Prepare game by game receivers data
+    games = current_szn['game_id'].unique()
+    receivers_list = []
+
+    for game in games:
+        current_game = current_szn[current_szn['game_id'] == game]
+        teams = current_game['posteam'].unique()
+
+        for team in teams:
+            offense = current_game[(current_game['posteam'] == team) & (current_game['pass'] == 1) & (current_game['play_type'] == 'pass')]
+            
+            if offense.empty:
+                continue  # Skip if there's no offense data
+
+            throws = offense[['complete_pass', 'incomplete_pass', 'interception']].sum().sum()
+            team_air_yards = offense['air_yards'].sum()
+
+            receivers = offense.groupby(['receiver_player_name', 'posteam', 'game_id', 'week'])[['pass', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'goal_to_go', 'touchdown', 'xTDs', 'end_zone_target']].sum()
+            receivers['team_attempts'] = throws
+            receivers['team_air_yards'] = team_air_yards
+            
+            receivers_list.append(receivers)
+
+    # Concatenate all receivers data at once
+    game_by_game_receivers = pd.concat(receivers_list).rename(columns={'pass': 'targets'})
+
+    # Calculate shares and WOPR
+    game_by_game_receivers['target_share'] = round(game_by_game_receivers['targets'] / game_by_game_receivers['team_attempts'], 3)
+    game_by_game_receivers['air_yards_share'] = round(game_by_game_receivers['air_yards'] / game_by_game_receivers['team_air_yards'], 3)
+    game_by_game_receivers['WOPR'] = round(1.5 * game_by_game_receivers['target_share'] + 0.7 * game_by_game_receivers['air_yards_share'], 3)
+
+    return game_by_game_receivers
+
+# Aggregating season receivers
+#@st.cache_data
+def aggregate_season_receivers(game_by_game_receivers):
+    szn_receivers = game_by_game_receivers.reset_index().groupby(['receiver_player_name', 'posteam'])[['targets', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'goal_to_go', 'touchdown', 'xTDs', 'end_zone_target', 'team_attempts', 'team_air_yards']].sum()
+    
+    szn_receivers['target_share'] = round(szn_receivers['targets'] / szn_receivers['team_attempts'], 3)
+    szn_receivers['air_yards_share'] = round(szn_receivers['air_yards'] / szn_receivers['team_air_yards'], 3)
+    szn_receivers['WOPR'] = round(1.5 * szn_receivers['target_share'] + 0.7 * szn_receivers['air_yards_share'], 3)
+    szn_receivers['aDOT'] = round(szn_receivers['air_yards'] / szn_receivers['targets'], 1)
+    
+    # Round columns
+    szn_receivers[['xFPs', 'xYards', 'xTDs', 'cp']] = szn_receivers[['xFPs', 'xYards', 'xTDs', 'cp']].round(1)
+
+    return szn_receivers.sort_values('WOPR', ascending=False).reset_index()
+
+
+
+
+
+
+
+
+
+
+
+# Caching data loading
+#@st.cache_data
+def load_data():
+    data_all = pd.DataFrame()
+    YEARS = [2023, 2024]
+
+    for i in YEARS:
+        i_data = pd.read_csv('https://github.com/nflverse/nflverse-data/releases/download/pbp/' \
+                             'play_by_play_' + str(i) + '.csv.gz',
+                             compression='gzip', low_memory=False)
+
+        data_all = pd.concat([data_all, i_data])
+
+    return data_all
+
+# Caching data processing
+#@st.cache_data
+def preprocess_data(data):
+    data = data.loc[(data.play_type.isin(['no_play', 'pass', 'run'])) & (data.epa.isna() == False)]
+    data.loc[data['pass'] == 1, 'play_type'] = 'pass'
+    data.loc[data.rush == 1, 'play_type'] = 'run'
+    data.reset_index(drop=True, inplace=True)
+    data = data.dropna(subset=['posteam'])
+
+    # Creating new columns
+    new_columns_data = pd.DataFrame({
+        'turnover': data['interception'] + data['fumble_lost'],
+        '20+_play': (data['yards_gained'] > 19).astype(int),
+        'short_pass': (data['air_yards'] < 10).astype(int),
+        'medium_pass': ((data['air_yards'] > 9) & (data['air_yards'] < 20)).astype(int),
+        'deep_pass': (data['air_yards'] > 19).astype(int),
+        'fantasy_points': (
+            data['complete_pass'] * 1 +  # 1 point per completion
+            data['touchdown'] * 6 +       # 6 points per touchdown
+            data['yards_gained'] * 0.1     # 0.1 points per yard gained
+        ),
+        'end_zone_target': (data['yardline_100'] - data['air_yards']) <= 0,
+        'distance_to_EZ_after_target': data['yardline_100'] - data['air_yards'],
+        'goal_to_go': (data['yardline_100'] < 10).astype(int)
+    })
+
+    # Concatenate the new columns to the original DataFrame
+    data = pd.concat([data, new_columns_data], axis=1)
+    return data
+
+
+
+
+# Caching the function to avoid recomputation when the same game_id is used
+#@st.cache_data
+def wp_graph(dataframe, game_id):
+    # Filter the dataframe once
+    df = dataframe[dataframe['game_id'] == game_id].copy()
+    
+    # Vectorized calculation of seconds and minutes
+    df['second#'] = np.where(df['qtr'] != 5, 3600 - df['game_seconds_remaining'], 600 - df['game_seconds_remaining'] + 3600)
+    df['minute#'] = df['second#'] / 60
+
+    # Resetting index and extracting required values for plotting
     df = df.reset_index().reset_index()
-
-    host = df['home_team'].max()
-    visitor = df['away_team'].max()
-
-    week = df['week'].max()
+    host = df['home_team'].iloc[0]  # Use .iloc for single value extraction
+    visitor = df['away_team'].iloc[0]
+    week = df['week'].iloc[0]
     
-    df['quarter_marker'] = df.apply(get_quarter_value, axis=1)
-
+    # Efficient creation of quarter marker values without .apply()
+    df['quarter_marker'] = np.where(df['desc'] == 'END QUARTER', df['level_0'], np.nan)
     quarter_list = list(df['quarter_marker'].dropna().unique())
 
+    # Creating the figure
     fig = go.Figure()
-    
-    fig = go.Figure(data=go.Scatter(
+
+    fig.add_trace(go.Scatter(
         x=df['level_0'],
         y=df['home_wp_post'],
         mode='lines+markers',
-        connectgaps= True,
-        text=df.apply(lambda row: f"{row['desc']}; {host}: {row['total_home_score']}, {visitor}: {row['total_away_score']}", axis=1),
-        hovertemplate='%{text}<extra></extra>'  # Custom hover template
+        connectgaps=True,
+        text=[f"{row['desc']}; {host}: {row['total_home_score']}, {visitor}: {row['total_away_score']}" for _, row in df.iterrows()],
+        hovertemplate='%{text}<extra></extra>'
     ))
 
+    # Adding quarter and halfway line markers more efficiently
     for x in quarter_list:
-        fig.add_shape(type="line", line=dict(width=1, color="red"),
-                  x0=x, x1=x, y0=df['home_wp_post'].min(), y1=1)
+        fig.add_shape(type="line", line=dict(width=1, color="red"), x0=x, x1=x, y0=df['home_wp_post'].min(), y1=1)
+    fig.add_shape(type="line", line=dict(width=1, color="black"), x0=df['level_0'].min(), x1=df['level_0'].max(), y0=0.5, y1=0.5)
 
-    fig.add_shape(type="line", line=dict(width=1, color="black"),
-              x0=df['level_0'].min(), x1=df['level_0'].max(), y0=0.5, y1=0.5)
-# Set layout properties
-    fig.update_layout(title_text=f"{host} Win Probability vs. {visitor} (Week {week})", title_x=0.5)
+    # Set layout properties
+    fig.update_layout(
+        title_text=f"{host} Win Probability vs. {visitor} (Week {week})", 
+        title_x=0.5,
+        xaxis=dict(showticklabels=False)  # Combine axis updates into layout settings
+    )
 
-    fig.update_xaxes(showticklabels=False)
-    
     return fig
 
 
 
 # %%
-game_by_game_receivers = pd.DataFrame()
 
-
-rec_data = data[data['air_yards'].notna()]
-rec_data = rec_data[rec_data['receiver_player_name'].notna()]
-
-current_szn = rec_data[rec_data['season']==2024]
-
-new_predictors = [
-    'air_yards', 'yardline_100', 'ydstogo',
-    'down', 'pass_location', 'season', 'qb_hit', 'end_zone_target', 'distance_to_EZ_after_target'
-]
-
-new_X = current_szn[new_predictors]
-
-new_X = pd.get_dummies(new_X, columns=['pass_location'], drop_first=True)
-
-# For current_szn, assuming you need to create similar columns:
-new_columns_current = pd.DataFrame({
-    'xYards': yardage_model.predict(new_X),
-    'xTDs': touchdown_model.predict(new_X),
-    'xFPs': (yardage_model.predict(new_X) * 0.1) + (touchdown_model.predict(new_X) * 6) + current_szn['cp']
-})
-
-# Concatenate the new columns to the current_szn DataFrame
-current_szn = pd.concat([current_szn, new_columns_current], axis=1)
-
-
-
-data['fantasy_points'] = (
-    data['complete_pass'] * 1 +          # 1 point per completion
-    data['touchdown'] * 6 +           # 6 points per touchdown
-    data['yards_gained'] * 0.1        # 0.1 points per yard gained
-)
-
-
-for game in current_szn['game_id'].unique():
-    current_game = current_szn[current_szn['game_id']==game]
-    for team in current_game['posteam'].unique():
-        offense = current_game[current_game['posteam']==team]
-        offense = offense[offense['pass']==1]
-        offense = offense[offense['play_type']=='pass']
-        
-        throws = offense['complete_pass'].sum() + offense['incomplete_pass'].sum() + offense['interception'].sum()
-        team_air_yards = offense['air_yards'].sum()
-
-        receivers = offense.groupby(['receiver_player_name','posteam','game_id','week'])[['pass','fantasy_points','xFPs', 'complete_pass','cp', 'yards_gained','xYards', 'air_yards', 'goal_to_go','touchdown','xTDs','end_zone_target']].sum()
-        receivers['team_attempts'] = throws
-        receivers['team_air_yards'] = team_air_yards
-        game_by_game_receivers = pd.concat([game_by_game_receivers,receivers])
-
-game_by_game_receivers.rename(columns={'pass':'targets'},inplace=True)
-
-# %%
-game_by_game_receivers.rename(columns={'pass':'targets'},inplace=True)
-
-# %%
-game_by_game_receivers['target_share'] = round(game_by_game_receivers['targets']/game_by_game_receivers['team_attempts'],3)
-game_by_game_receivers['air_yards_share'] = round(game_by_game_receivers['air_yards']/game_by_game_receivers['team_air_yards'],3)
-game_by_game_receivers['WOPR'] = 1.5 * game_by_game_receivers['target_share'] + 0.7 * game_by_game_receivers['air_yards_share']
-
-
-# %%
-szn_receivers = game_by_game_receivers.reset_index().groupby(['receiver_player_name','posteam'])[['targets', 'fantasy_points','xFPs','complete_pass','cp', 'yards_gained','xYards', 'air_yards', 'goal_to_go','touchdown','xTDs','end_zone_target','team_attempts','team_air_yards']].sum()
-szn_receivers['target_share'] = round(szn_receivers['targets']/szn_receivers['team_attempts'],3)
-szn_receivers['air_yards_share'] = round(szn_receivers['air_yards']/szn_receivers['team_air_yards'],3)
-szn_receivers['WOPR'] = round(1.5 * szn_receivers['target_share'] + 0.7 * szn_receivers['air_yards_share'],3)
-szn_receivers['aDOT'] = round(szn_receivers['air_yards']/szn_receivers['targets'],1)
-szn_receivers[['xFPs', 'xYards', 'xTDs','cp']] = szn_receivers[['xFPs', 'xYards', 'xTDs','cp']].round(1)
-
-
-# %%
-szn_receivers = szn_receivers.sort_values('WOPR',ascending=False).reset_index()
 
 #szn_receivers.head(50)
 
@@ -231,6 +225,17 @@ szn_receivers = szn_receivers.sort_values('WOPR',ascending=False).reset_index()
 
 def game_review(game_id):
 #game_id = '2023_02_MIN_PHI'
+
+    yardage_model, touchdown_model = load_models()
+
+    # Load and preprocess data
+    data_all = load_data()
+    data = preprocess_data(data_all)
+    
+    game_by_game_receivers = process_data(data, yardage_model, touchdown_model)
+    szn_receivers = aggregate_season_receivers(game_by_game_receivers)
+
+
 
 
     game = data[data['game_id']==game_id]
@@ -1463,23 +1468,21 @@ def get_team_stats(team, year, data_df, rec_dataframe):
 
 
 # Streamlit app
-import streamlit as st
-
 def main():
+
+
     # Create a select box for user to choose between Preview and Review
-    choice = st.selectbox("Select an Option", ["Preview", "Review", "Team Analysis"])
+    choice = st.selectbox("Select an Option", ["Preview", "Review","Team Analysis"])
 
     if choice == "Preview":
-        with st.form(key='preview_form'):
+        with st.container():
             st.write("Please enter the following information:")
-            season = st.number_input("Season (Integer)", min_value=1)
+            season = st.number_input("Season (Integer)")
             team_a = st.text_input("Team A (String)")
             team_b = st.text_input("Team B (String)")
 
-            # Create a submit button to confirm the selection
-            submit_button = st.form_submit_button("Confirm Selection")
-
-            if submit_button:
+            # Create a button to confirm the selection
+            if st.button("Confirm Selection"):
                 if season and team_a and team_b:
                     # Call the overall_creator function and display the result
                     overall_result = overall_creator(season, team_a, team_b)
@@ -1499,38 +1502,50 @@ def main():
                     st.warning("Please enter all required information.")
 
     elif choice == "Review":
-        with st.form(key='review_form'):
-            game_id = st.text_input("Enter Game ID")
-            submit_button = st.form_submit_button("Submit")
-
-            if submit_button:
-                if game_id:
-                    # Call the game_review function and display the result
-                    review_result = game_review(game_id)
-                    st.write(review_result)
-                else:
-                    st.warning("Please enter a Game ID.")
+        # If "Review" is selected, create a text input for Game ID
+        game_id = st.text_input("Enter Game ID")
+        
+        # Create a button to trigger the game review
+        if st.button("Submit"):
+            if game_id:
+                # Call the game_review function and display the result
+                review_result = game_review(game_id)
+                st.write(review_result)
+            else:
+                st.warning("Please enter a Game ID.")
 
     elif choice == "Team Analysis":
-        with st.form(key='team_analysis_form'):
+        with st.container():
             st.write("Please enter the following information:")
             season = st.number_input("Season")
             team = st.text_input("Team")
-            submit_button = st.form_submit_button("Submit")
 
-            if submit_button:
-                if team:
-                    # Call the get_team_stats function and display the result
-                    analysis_1, analysis_2, analysis_3, analysis_4, analysis_5, analysis_6, analysis_7 = get_team_stats(team, season, data, szn_receivers)
-                    st.write(analysis_1)
-                    st.write(analysis_2)
-                    st.write(analysis_3)
-                    st.write(analysis_4)
-                    st.write(analysis_5)
-                    st.plotly_chart(analysis_6)
-                    st.plotly_chart(analysis_7)
-                else:
-                    st.warning("Please enter valid inputs.")
+        
+        # Create a button to trigger the game review
+        if st.button("Submit"):
+            if team:
+                # Call the game_review function and display the result
+                analysis_1, analysis_2, analysis_3, analysis_4, analysis_5, analysis_6, analysis_7 = get_team_stats(team, season, data, szn_receivers)
+                st.write(analysis_1)
+                st.write(analysis_2)
+                st.write(analysis_3)
+                st.write(analysis_4)
+                st.write(analysis_5)
+                st.plotly_chart(analysis_6)
+                st.plotly_chart(analysis_7)
+
+
+            else:
+                st.warning("Please enter valid inputs.")
 
 if __name__ == "__main__":
     main()
+
+
+
+
+#input_string = st.text_input("Enter a string")
+
+#if st.button('Submit'):
+#    result = game_review(input_string)
+#    st.write(result)
