@@ -10,15 +10,9 @@ import plotly.graph_objects as go
 
 
 # %%
-YEARS = [2023,2024]
 
 
-with open('yardage_model.pkl', 'rb') as file:
-    yardage_model = pickle.load(file)
 
-
-with open('touchdown_model.pkl', 'rb') as file:
-    touchdown_model = pickle.load(file)
 
 
 
@@ -120,111 +114,117 @@ data = load_and_process_data()
 # %%
 #data = df.copy()
 
-def wp_graph(dataframe,game_id):
-    df = dataframe[dataframe['game_id']==game_id]
-    
+
+def calculate_seconds_vectorized(df):
+    return np.where(
+        df['qtr'] != 5,
+        3600 - df['game_seconds_remaining'],
+        600 - df['game_seconds_remaining'] + 3600
+    )
+
+def get_quarter_value(df):
+    return np.where(df['desc'].str.contains('END QUARTER'), df['level_0'], np.nan)
+
+
+
+
+
+@st.cache_resource
+def load_model(filename):
+    with open(filename, 'rb') as file:
+        return pickle.load(file)
+
+@st.cache_data
+def load_play_by_play(years):
+    data_all = pd.DataFrame()
+    for year in years:
+        url = f'https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{year}.csv.gz'
+        yearly_data = pd.read_csv(url, compression='gzip', low_memory=False)
+        data_all = pd.concat([data_all, yearly_data])
+    return data_all
+
+@st.cache_data
+def preprocess_data(data):
+    data = data.loc[(data.play_type.isin(['no_play', 'pass', 'run'])) & (~data.epa.isna())]
+    data.loc[data['pass'] == 1, 'play_type'] = 'pass'
+    data.loc[data.rush == 1, 'play_type'] = 'run'
+    data.reset_index(drop=True, inplace=True)
+    data.dropna(subset=['posteam'], inplace=True)
+    data['fantasy_points'] = data['complete_pass'] * 1 + data['touchdown'] * 6 + data['yards_gained'] * 0.1
+    return data
+
+# Load models and data
+yardage_model = load_model('yardage_model.pkl')
+touchdown_model = load_model('touchdown_model.pkl')
+data = preprocess_data(load_play_by_play([2023, 2024]))
+
+@st.cache_data
+def wp_graph(dataframe, game_id):
+    df = dataframe[dataframe['game_id'] == game_id].copy()
     df['second#'] = df.apply(calculate_seconds, axis=1)
-
-    df['minute#'] = df['second#']/60
-
-    df = df.reset_index().reset_index()
-
-    host = df['home_team'].max()
-    visitor = df['away_team'].max()
-
+    df['minute#'] = df['second#'] / 60
+    host, visitor = df['home_team'].max(), df['away_team'].max()
     week = df['week'].max()
-    
     df['quarter_marker'] = df.apply(get_quarter_value, axis=1)
-
     quarter_list = list(df['quarter_marker'].dropna().unique())
 
-    fig = go.Figure()
-    
     fig = go.Figure(data=go.Scatter(
         x=df['level_0'],
         y=df['home_wp_post'],
         mode='lines+markers',
-        connectgaps= True,
+        connectgaps=True,
         text=df.apply(lambda row: f"{row['desc']}; {host}: {row['total_home_score']}, {visitor}: {row['total_away_score']}", axis=1),
-        hovertemplate='%{text}<extra></extra>'  # Custom hover template
+        hovertemplate='%{text}<extra></extra>'
     ))
 
     for x in quarter_list:
-        fig.add_shape(type="line", line=dict(width=1, color="red"),
-                  x0=x, x1=x, y0=df['home_wp_post'].min(), y1=1)
+        fig.add_shape(type="line", line=dict(width=1, color="red"), x0=x, x1=x, y0=df['home_wp_post'].min(), y1=1)
+    fig.add_shape(type="line", line=dict(width=1, color="black"), x0=df['level_0'].min(), x1=df['level_0'].max(), y0=0.5, y1=0.5)
 
-    fig.add_shape(type="line", line=dict(width=1, color="black"),
-              x0=df['level_0'].min(), x1=df['level_0'].max(), y0=0.5, y1=0.5)
-# Set layout properties
     fig.update_layout(title_text=f"{host} Win Probability vs. {visitor} (Week {week})", title_x=0.5)
-
     fig.update_xaxes(showticklabels=False)
-    
     return fig
 
+@st.cache_data
+def process_receivers_data(data, yardage_model, touchdown_model):
+    game_by_game_receivers = pd.DataFrame()
+    current_szn = data[data['season'] == 2024]
 
+    new_predictors = [
+        'air_yards', 'yardline_100', 'ydstogo', 'down', 'pass_location', 'season', 'qb_hit', 'end_zone_target', 'distance_to_EZ_after_target'
+    ]
+    new_X = pd.get_dummies(current_szn[new_predictors], columns=['pass_location'], drop_first=True)
 
-# %%
-game_by_game_receivers = pd.DataFrame()
+    new_columns_current = pd.DataFrame({
+        'xYards': yardage_model.predict(new_X),
+        'xTDs': touchdown_model.predict(new_X),
+        'xFPs': (yardage_model.predict(new_X) * 0.1) + (touchdown_model.predict(new_X) * 6) + current_szn['cp']
+    })
+    current_szn = pd.concat([current_szn, new_columns_current], axis=1)
 
+    for game in current_szn['game_id'].unique():
+        current_game = current_szn[current_szn['game_id'] == game]
+        for team in current_game['posteam'].unique():
+            offense = current_game[(current_game['posteam'] == team) & (current_game['pass'] == 1) & (current_game['play_type'] == 'pass')]
+            throws = offense['complete_pass'].sum() + offense['incomplete_pass'].sum() + offense['interception'].sum()
+            team_air_yards = offense['air_yards'].sum()
 
-rec_data = data[data['air_yards'].notna()]
-rec_data = rec_data[rec_data['receiver_player_name'].notna()]
+            receivers = offense.groupby(['receiver_player_name', 'posteam', 'game_id', 'week'])[
+                ['pass', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'touchdown', 'xTDs', 'end_zone_target']
+            ].sum()
+            receivers['team_attempts'] = throws
+            receivers['team_air_yards'] = team_air_yards
+            game_by_game_receivers = pd.concat([game_by_game_receivers, receivers])
 
-current_szn = rec_data[rec_data['season']==2024]
+    game_by_game_receivers.rename(columns={'pass': 'targets'}, inplace=True)
+    game_by_game_receivers['target_share'] = round(game_by_game_receivers['targets'] / game_by_game_receivers['team_attempts'], 3)
+    game_by_game_receivers['air_yards_share'] = round(game_by_game_receivers['air_yards'] / game_by_game_receivers['team_air_yards'], 3)
+    game_by_game_receivers['WOPR'] = 1.5 * game_by_game_receivers['target_share'] + 0.7 * game_by_game_receivers['air_yards_share']
+    return game_by_game_receivers
 
-new_predictors = [
-    'air_yards', 'yardline_100', 'ydstogo',
-    'down', 'pass_location', 'season', 'qb_hit', 'end_zone_target', 'distance_to_EZ_after_target'
-]
+# Use processed data in the app
+game_by_game_receivers = process_receivers_data(data, yardage_model, touchdown_model)
 
-new_X = current_szn[new_predictors]
-
-new_X = pd.get_dummies(new_X, columns=['pass_location'], drop_first=True)
-
-# For current_szn, assuming you need to create similar columns:
-new_columns_current = pd.DataFrame({
-    'xYards': yardage_model.predict(new_X),
-    'xTDs': touchdown_model.predict(new_X),
-    'xFPs': (yardage_model.predict(new_X) * 0.1) + (touchdown_model.predict(new_X) * 6) + current_szn['cp']
-})
-
-# Concatenate the new columns to the current_szn DataFrame
-current_szn = pd.concat([current_szn, new_columns_current], axis=1)
-
-
-
-data['fantasy_points'] = (
-    data['complete_pass'] * 1 +          # 1 point per completion
-    data['touchdown'] * 6 +           # 6 points per touchdown
-    data['yards_gained'] * 0.1        # 0.1 points per yard gained
-)
-
-
-for game in current_szn['game_id'].unique():
-    current_game = current_szn[current_szn['game_id']==game]
-    for team in current_game['posteam'].unique():
-        offense = current_game[current_game['posteam']==team]
-        offense = offense[offense['pass']==1]
-        offense = offense[offense['play_type']=='pass']
-        
-        throws = offense['complete_pass'].sum() + offense['incomplete_pass'].sum() + offense['interception'].sum()
-        team_air_yards = offense['air_yards'].sum()
-
-        receivers = offense.groupby(['receiver_player_name','posteam','game_id','week'])[['pass','fantasy_points','xFPs', 'complete_pass','cp', 'yards_gained','xYards', 'air_yards', 'touchdown','xTDs','end_zone_target']].sum()
-        receivers['team_attempts'] = throws
-        receivers['team_air_yards'] = team_air_yards
-        game_by_game_receivers = pd.concat([game_by_game_receivers,receivers])
-
-game_by_game_receivers.rename(columns={'pass':'targets'},inplace=True)
-
-# %%
-game_by_game_receivers.rename(columns={'pass':'targets'},inplace=True)
-
-# %%
-game_by_game_receivers['target_share'] = round(game_by_game_receivers['targets']/game_by_game_receivers['team_attempts'],3)
-game_by_game_receivers['air_yards_share'] = round(game_by_game_receivers['air_yards']/game_by_game_receivers['team_air_yards'],3)
-game_by_game_receivers['WOPR'] = 1.5 * game_by_game_receivers['target_share'] + 0.7 * game_by_game_receivers['air_yards_share']
 
 
 # %%
