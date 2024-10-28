@@ -1179,12 +1179,21 @@ with header:
     st.write("All data from NFLVerse.")
 
 
-def get_off_stats(team,data,rec_data):
+def get_off_stats(team,data):
 
     
-    # Filter data for the specified team
-    #team_data = data[(data['posteam'] == team) | (pbp['defteam'] == team)]
+    yardage_model, touchdown_model = load_models()
+
     
+    game_by_game_receivers = process_data(data, yardage_model, touchdown_model)
+    szn_receivers = aggregate_season_receivers(game_by_game_receivers)
+
+    rec_data = szn_receivers.reset_index()
+
+
+
+    # Filter data for the specified team
+    #     
     team_data = data[(data['posteam'] == team)]
 
     # Calculate statistics
@@ -1342,23 +1351,31 @@ def get_def_stats(team,data):
     return df
 
 
-def get_team_stats(team, year, data_df, rec_dataframe):
+def get_team_stats(team, year):
 
-    previous = year - 1    
-
-    data = data_df[data_df['season']==year]
-    data = data.loc[data.season_type=='REG']
 
 
 
-    off_df = get_off_stats(team,data, rec_dataframe)[0]
+    previous = year - 1    
+    # Load and preprocess data
+    data_all = load_data()
+    data = preprocess_data(data_all)
+    
+    
+    
+    data = data_df[(data_df['season'] == year) & (data_df['season_type'] == 'REG')]
+
+
+
+
+    off_df = get_off_stats(team, data)[0]
     year1 = off_df.copy()
 
     off_df = off_df.rename(columns={'Stat':f'{year} {team} Offense'})
 
-    pass_df = get_off_stats(team,data,rec_dataframe)[1]
-    rush_df = get_off_stats(team,data,rec_dataframe)[2]
-    rec_df = get_off_stats(team,data,rec_dataframe)[3]
+    pass_df = get_off_stats(team,data)[1]
+    rush_df = get_off_stats(team,data)[2]
+    rec_df = get_off_stats(team,data)[3]
 
     def_df = get_def_stats(team,data)
     year1_def = def_df.copy()
@@ -1468,14 +1485,14 @@ def get_team_stats(team, year, data_df, rec_dataframe):
 
 
 def preview_maker(season, team_a, team_b):
-    yardage_model, touchdown_model = load_models()
+    #yardage_model, touchdown_model = load_models()
 
     # Load and preprocess data
     data_all = load_data()
     data = preprocess_data(data_all)
     
-    game_by_game_receivers = process_data(data, yardage_model, touchdown_model)
-    szn_receivers = aggregate_season_receivers(game_by_game_receivers)
+    #game_by_game_receivers = process_data(data, yardage_model, touchdown_model)
+    #szn_receivers = aggregate_season_receivers(game_by_game_receivers)
 
     overall_result = overall_creator(data, season, team_a, team_b)
     overall_result2 = overall_creator(data, season, team_b, team_a)
