@@ -84,10 +84,11 @@ def load_and_process_data():
     })
 
     # Concatenate new columns to the original DataFrame
-    return pd.concat([data, new_columns_data], axis=1)
+    return pd.concat([data, new_columns_data], axis=1),data_all
 
 # Load and process data using the cached function
-data = load_and_process_data()
+data = load_and_process_data()[0]
+data_all = load_and_process_data()[1]
 
 
 
