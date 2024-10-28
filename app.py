@@ -1466,15 +1466,13 @@ def get_team_stats(team, year, data_df, rec_dataframe):
 
 
 # Streamlit app
-import streamlit as st
-
 def main():
     # Create a select box for user to choose between Preview and Review
     choice = st.selectbox("Select an Option", ["Preview", "Review", "Team Analysis"])
 
     # Ensure session state variables exist for the input fields and button
     if 'season' not in st.session_state:
-        st.session_state['season'] = 2024
+        st.session_state['season'] = 0
     if 'team_a' not in st.session_state:
         st.session_state['team_a'] = ""
     if 'team_b' not in st.session_state:
@@ -1485,39 +1483,25 @@ def main():
     if choice == "Preview":
         with st.container():
             st.write("Please enter the following information:")
-            
-            # Use a form to handle input
-            with st.form(key='input_form'):
-                # Use the session state variables to store input values
-                season_input = st.number_input("Season (Integer)", 
-                                                value=st.session_state['season'], 
-                                                min_value=2023, max_value=2024)
-                team_a_input = st.text_input("Team A (String)", value=st.session_state['team_a'])
-                team_b_input = st.text_input("Team B (String)", value=st.session_state['team_b'])
 
-                # Submit button for the form
-                submit_button = st.form_submit_button("Confirm Selection")
+            # Use the session state variables to store input values
+            st.session_state['season'] = st.number_input("Season (Integer)", value=st.session_state['season'])
+            st.session_state['team_a'] = st.text_input("Team A (String)", value=st.session_state['team_a'])
+            st.session_state['team_b'] = st.text_input("Team B (String)", value=st.session_state['team_b'])
 
-                # Update session state only when the form is submitted
-                if submit_button:
-                    st.session_state['season'] = season_input
-                    st.session_state['team_a'] = team_a_input
-                    st.session_state['team_b'] = team_b_input
-
-                    # Only proceed if all required fields are filled
-                    if st.session_state['season'] and st.session_state['team_a'] and st.session_state['team_b']:
-                        st.session_state['confirm_clicked'] = True
-                    else:
-                        st.warning("Please enter all required information.")
+            # Confirm selection button updates session state to indicate selection is confirmed
+            if st.button("Confirm Selection"):
+                # Only proceed if all required fields are filled
+                if st.session_state['season'] and st.session_state['team_a'] and st.session_state['team_b']:
+                    st.session_state['confirm_clicked'] = True
+                else:
+                    st.warning("Please enter all required information.")
 
         # Only run the main logic when the "Confirm Selection" button is clicked
         if st.session_state['confirm_clicked']:
             season = st.session_state['season']
             team_a = st.session_state['team_a']
             team_b = st.session_state['team_b']
-            # Proceed with your main logic using the confirmed values
-            #st.write(f"Confirmed values - Season: {season}, Team A: {team_a}, Team B: {team_b}")
-
 
             # Call the overall_creator and matchup functions and display the results
             overall_result = overall_creator(season, team_a, team_b)
