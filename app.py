@@ -1508,7 +1508,7 @@ def main():
                 if season and team_a and team_b:
                     # Call the overall_creator function and display the result
                     
-                    overall_result, overalll_result2, pass_matchup1, rush_matchup1,pass_matchup2, rush_matchup2 = preview_maker(season, team_a, team_b)
+                    overall_result, overall_result2, pass_matchup1, rush_matchup1,pass_matchup2, rush_matchup2 = preview_maker(season, team_a, team_b)
                     # overall_result = overall_creator(season, team_a, team_b)
                     # overall_result2 = overall_creator(season, team_b, team_a)
                     # pass_matchup1 = pass_matchup(season, team_a, team_b)
