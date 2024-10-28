@@ -1463,21 +1463,23 @@ def get_team_stats(team, year, data_df, rec_dataframe):
 
 
 # Streamlit app
+import streamlit as st
+
 def main():
-
-
     # Create a select box for user to choose between Preview and Review
-    choice = st.selectbox("Select an Option", ["Preview", "Review","Team Analysis"])
+    choice = st.selectbox("Select an Option", ["Preview", "Review", "Team Analysis"])
 
     if choice == "Preview":
-        with st.container():
+        with st.form(key='preview_form'):
             st.write("Please enter the following information:")
-            season = st.number_input("Season (Integer)")
+            season = st.number_input("Season (Integer)", min_value=1)
             team_a = st.text_input("Team A (String)")
             team_b = st.text_input("Team B (String)")
 
-            # Create a button to confirm the selection
-            if st.button("Confirm Selection"):
+            # Create a submit button to confirm the selection
+            submit_button = st.form_submit_button("Confirm Selection")
+
+            if submit_button:
                 if season and team_a and team_b:
                     # Call the overall_creator function and display the result
                     overall_result = overall_creator(season, team_a, team_b)
@@ -1497,50 +1499,38 @@ def main():
                     st.warning("Please enter all required information.")
 
     elif choice == "Review":
-        # If "Review" is selected, create a text input for Game ID
-        game_id = st.text_input("Enter Game ID")
-        
-        # Create a button to trigger the game review
-        if st.button("Submit"):
-            if game_id:
-                # Call the game_review function and display the result
-                review_result = game_review(game_id)
-                st.write(review_result)
-            else:
-                st.warning("Please enter a Game ID.")
+        with st.form(key='review_form'):
+            game_id = st.text_input("Enter Game ID")
+            submit_button = st.form_submit_button("Submit")
+
+            if submit_button:
+                if game_id:
+                    # Call the game_review function and display the result
+                    review_result = game_review(game_id)
+                    st.write(review_result)
+                else:
+                    st.warning("Please enter a Game ID.")
 
     elif choice == "Team Analysis":
-        with st.container():
+        with st.form(key='team_analysis_form'):
             st.write("Please enter the following information:")
             season = st.number_input("Season")
             team = st.text_input("Team")
+            submit_button = st.form_submit_button("Submit")
 
-        
-        # Create a button to trigger the game review
-        if st.button("Submit"):
-            if team:
-                # Call the game_review function and display the result
-                analysis_1, analysis_2, analysis_3, analysis_4, analysis_5, analysis_6, analysis_7 = get_team_stats(team, season, data, szn_receivers)
-                st.write(analysis_1)
-                st.write(analysis_2)
-                st.write(analysis_3)
-                st.write(analysis_4)
-                st.write(analysis_5)
-                st.plotly_chart(analysis_6)
-                st.plotly_chart(analysis_7)
-
-
-            else:
-                st.warning("Please enter valid inputs.")
+            if submit_button:
+                if team:
+                    # Call the get_team_stats function and display the result
+                    analysis_1, analysis_2, analysis_3, analysis_4, analysis_5, analysis_6, analysis_7 = get_team_stats(team, season, data, szn_receivers)
+                    st.write(analysis_1)
+                    st.write(analysis_2)
+                    st.write(analysis_3)
+                    st.write(analysis_4)
+                    st.write(analysis_5)
+                    st.plotly_chart(analysis_6)
+                    st.plotly_chart(analysis_7)
+                else:
+                    st.warning("Please enter valid inputs.")
 
 if __name__ == "__main__":
     main()
-
-
-
-
-#input_string = st.text_input("Enter a string")
-
-#if st.button('Submit'):
-#    result = game_review(input_string)
-#    st.write(result)
