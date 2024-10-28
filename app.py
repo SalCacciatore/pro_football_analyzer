@@ -115,15 +115,18 @@ data = load_and_process_data()
 #data = df.copy()
 
 
-def calculate_seconds_vectorized(df):
-    return np.where(
+@st.cache_data
+def preprocess_data(df):
+    # Vectorized calculation of seconds
+    df['second#'] = np.where(
         df['qtr'] != 5,
         3600 - df['game_seconds_remaining'],
         600 - df['game_seconds_remaining'] + 3600
     )
-
-def get_quarter_value(df):
-    return np.where(df['desc'].str.contains('END QUARTER'), df['level_0'], np.nan)
+    
+    # Calculate minutes directly
+    df['minute#'] = df['second#'] / 60
+    return df
 
 
 
@@ -161,8 +164,7 @@ data = preprocess_data(load_play_by_play([2023, 2024]))
 @st.cache_data
 def wp_graph(dataframe, game_id):
     df = dataframe[dataframe['game_id'] == game_id].copy()
-    df['second#'] = df.apply(calculate_seconds, axis=1)
-    df['minute#'] = df['second#'] / 60
+    df = preprocess_data(df)
     host, visitor = df['home_team'].max(), df['away_team'].max()
     week = df['week'].max()
     df['quarter_marker'] = df.apply(get_quarter_value, axis=1)
