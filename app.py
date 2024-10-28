@@ -1566,7 +1566,7 @@ def main():
         if st.button("Submit"):
             if team:
                 # Call the game_review function and display the result
-                analysis_1, analysis_2, analysis_3, analysis_4, analysis_5, analysis_6, analysis_7 = get_team_stats(team, season, data, szn_receivers)
+                analysis_1, analysis_2, analysis_3, analysis_4, analysis_5, analysis_6, analysis_7 = get_team_stats(team, season)
                 st.write(analysis_1)
                 st.write(analysis_2)
                 st.write(analysis_3)
