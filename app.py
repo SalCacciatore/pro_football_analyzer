@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 
 
 # %%
-YEARS = [2023,2024]
+YEARS = [2021, 2022, 2023,2024]
 
 
 with open('yardage_model.pkl', 'rb') as file:
@@ -197,7 +197,7 @@ for game in current_szn['game_id'].unique():
         throws = offense['complete_pass'].sum() + offense['incomplete_pass'].sum() + offense['interception'].sum()
         team_air_yards = offense['air_yards'].sum()
 
-        receivers = offense.groupby(['receiver_player_name','posteam','game_id','week'])[['pass','fantasy_points','xFPs', 'complete_pass','cp', 'yards_gained','xYards', 'air_yards', 'touchdown','xTDs','end_zone_target']].sum()
+        receivers = offense.groupby(['receiver_player_name','posteam','game_id','week'])[['pass','fantasy_points','xFPs', 'complete_pass','cp', 'yards_gained','xYards', 'air_yards', 'goal_to_go','touchdown','xTDs','end_zone_target']].sum()
         receivers['team_attempts'] = throws
         receivers['team_air_yards'] = team_air_yards
         game_by_game_receivers = pd.concat([game_by_game_receivers,receivers])
@@ -214,7 +214,7 @@ game_by_game_receivers['WOPR'] = 1.5 * game_by_game_receivers['target_share'] + 
 
 
 # %%
-szn_receivers = game_by_game_receivers.reset_index().groupby(['receiver_player_name','posteam'])[['targets', 'fantasy_points','xFPs','complete_pass','cp', 'yards_gained','xYards', 'air_yards', 'touchdown','xTDs','end_zone_target','team_attempts','team_air_yards']].sum()
+szn_receivers = game_by_game_receivers.reset_index().groupby(['receiver_player_name','posteam'])[['targets', 'fantasy_points','xFPs','complete_pass','cp', 'yards_gained','xYards', 'air_yards', 'goal_to_go','touchdown','xTDs','end_zone_target','team_attempts','team_air_yards']].sum()
 szn_receivers['target_share'] = round(szn_receivers['targets']/szn_receivers['team_attempts'],3)
 szn_receivers['air_yards_share'] = round(szn_receivers['air_yards']/szn_receivers['team_air_yards'],3)
 szn_receivers['WOPR'] = round(1.5 * szn_receivers['target_share'] + 0.7 * szn_receivers['air_yards_share'],3)
@@ -842,8 +842,27 @@ def game_review(game_id):
     rush_show = game[game['rush']==1].groupby('posteam').agg({'rush':'sum','epa':['mean','sum'],'success':'mean','yards_gained':['mean','sum','max'],'turnover':'sum','20+_play':'sum'}).round(2)
 
 # %%
-    rushers = game[game['rush']==1].groupby('rusher_player_name').agg({'posteam':'max','rush':'sum','epa':'sum','success':'mean','yards_gained':'sum','turnover':'sum','touchdown':'sum','goal_to_go':'sum','20+_play':'sum'}).round(2).sort_values(['posteam','rush'],ascending=False)
+    rushers = (
+    game[game['rush'] == 1]
+    .groupby('rusher_player_name')
+    .agg({
+        'posteam': 'max',
+        'rush': 'sum',
+        'epa': 'sum',
+        'success': 'mean',
+        'yards_gained': 'sum',
+        'turnover': 'sum',
+        'touchdown': 'sum',
+        'goal_to_go': 'sum',
+        '20+_play': 'sum'
+    })
+    .reset_index()  # Reset the index to make 'rusher_player_name' a column again
+    .round(2)
+    .sort_values(['posteam', 'rush'], ascending=False)
+)
 
+# Optional: Set a name for the DataFrame to avoid attribute issues
+    rushers.name = "Rushers Data"
 # %%
     game_receivers = game_by_game_receivers.reset_index()
     game_receivers['aDOT'] = round(game_receivers['air_yards']/game_receivers['targets'],1)
