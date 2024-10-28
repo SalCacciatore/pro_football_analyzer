@@ -52,8 +52,24 @@ def process_data(data, yardage_model, touchdown_model):
     current_szn = rec_data[rec_data['season'] == 2024]
 
     # Get predictions and concatenate with current_szn
-    new_columns_current = predict_columns(current_szn, yardage_model, touchdown_model)
-    current_szn = pd.concat([current_szn.reset_index(drop=True), new_columns_current], axis=1)
+    #new_columns_current = predict_columns(current_szn, yardage_model, touchdown_model)
+    new_predictors = [
+    'air_yards', 'yardline_100', 'ydstogo',
+    'down', 'pass_location', 'season', 'qb_hit', 'end_zone_target', 'distance_to_EZ_after_target']
+
+    new_X = current_szn[new_predictors]
+    new_X = pd.get_dummies(new_X, columns=['pass_location'], drop_first=True)
+    new_columns_current = pd.DataFrame({
+    'xYards': yardage_model.predict(new_X),
+    'xTDs': touchdown_model.predict(new_X),
+    'xFPs': (yardage_model.predict(new_X) * 0.1) + (touchdown_model.predict(new_X) * 6) + current_szn['cp']
+    })
+
+# Concatenate the new columns to the current_szn DataFrame
+    current_szn = pd.concat([current_szn, new_columns_current], axis=1)
+    
+    
+    #current_szn = pd.concat([current_szn.reset_index(drop=True), new_columns_current], axis=1)
 
     # Calculate fantasy points
     data['fantasy_points'] = (
@@ -226,12 +242,8 @@ def wp_graph(dataframe, game_id):
 def game_review(game_id):
 #game_id = '2023_02_MIN_PHI'
 
-    with open('yardage_model.pkl', 'rb') as file:
-        yardage_model = pickle.load(file)
-    
-    with open('touchdown_model.pkl', 'rb') as file:
-        touchdown_model = pickle.load(file)
-    
+    yardage_model, touchdown_model = load_models()
+
     # Load and preprocess data
     data_all = load_data()
     data = preprocess_data(data_all)
