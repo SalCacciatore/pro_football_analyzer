@@ -85,38 +85,6 @@ data = load_and_process_data()[0]
 data_all = load_and_process_data()[1]
 
 
-
-
-
-#data['20+_play'] = (data['yards_gained'] > 19).astype(int)
-#data['short_pass'] = (data['air_yards'] < 10).astype(int)
-#data['medium_pass'] = ((data['air_yards'] > 9)&(data['air_yards']<20)).astype(int)
-#data['deep_pass'] = (data['air_yards'] > 19).astype(int)
-
-
-
-#data_all = pd.read_csv('fill_in_all.csv')
-#data = pd.read_csv('fill_in.csv')
-
-# %%
-#data_all['season'].unique()
-
-# %%
-#df = pd.DataFrame()
-#for game in tqdm.tqdm(data['game_id'].unique()):
- #   current_game = data[data['game_id']==game]
- #   host = current_game['home_team'].max()
- #   visitor = current_game['away_team'].max()
- #   home_score = current_game['home_score'].max()
- #   away_score = current_game['away_score'].max()
- #   score_dict = {host:home_score,visitor:away_score}
- #   current_game['total_points'] = current_game['posteam'].map(score_dict)
- #   df = pd.concat([df,current_game])
-
-# %%
-#data = df.copy()
-
-
 @st.cache_data
 def preprocess_time(df):
     # Vectorized calculation of seconds
@@ -139,14 +107,7 @@ def load_model(filename):
     with open(filename, 'rb') as file:
         return pickle.load(file)
 
-@st.cache_data
-def load_play_by_play(years):
-    data_all = pd.DataFrame()
-    for year in years:
-        url = f'https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{year}.csv.gz'
-        yearly_data = pd.read_csv(url, compression='gzip', low_memory=False)
-        data_all = pd.concat([data_all, yearly_data])
-    return data_all
+
 
 @st.cache_data
 def preprocess_data(data):
@@ -161,7 +122,7 @@ def preprocess_data(data):
 # Load models and data
 yardage_model = load_model('yardage_model.pkl')
 touchdown_model = load_model('touchdown_model.pkl')
-data = preprocess_data(load_play_by_play([2023, 2024]))
+#data = preprocess_data(load_play_by_play([2023, 2024]))
 
 @st.cache_data
 def wp_graph(dataframe, game_id):
