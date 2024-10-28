@@ -842,27 +842,8 @@ def game_review(game_id):
     rush_show = game[game['rush']==1].groupby('posteam').agg({'rush':'sum','epa':['mean','sum'],'success':'mean','yards_gained':['mean','sum','max'],'turnover':'sum','20+_play':'sum'}).round(2)
 
 # %%
-    rushers = (
-    game[game['rush'] == 1]
-    .groupby('rusher_player_name')
-    .agg({
-        'posteam': 'max',
-        'rush': 'sum',
-        'epa': 'sum',
-        'success': 'mean',
-        'yards_gained': 'sum',
-        'turnover': 'sum',
-        'touchdown': 'sum',
-        'goal_to_go': 'sum',
-        '20+_play': 'sum'
-    })
-    .reset_index()  # Reset the index to make 'rusher_player_name' a column again
-    .round(2)
-    .sort_values(['posteam', 'rush'], ascending=False)
-)
+    rushers = game[game['rush']==1].groupby('rusher_player_name').agg({'posteam':'max','rush':'sum','epa':'sum','success':'mean','yards_gained':'sum','turnover':'sum','touchdown':'sum','goal_to_go':'sum','20+_play':'sum'}).round(2).sort_values(['posteam','rush'],ascending=False)
 
-# Optional: Set a name for the DataFrame to avoid attribute issues
-    rushers.name = "Rushers Data"
 # %%
     game_receivers = game_by_game_receivers.reset_index()
     game_receivers['aDOT'] = round(game_receivers['air_yards']/game_receivers['targets'],1)
@@ -1563,4 +1544,3 @@ if __name__ == "__main__":
 #if st.button('Submit'):
 #    result = game_review(input_string)
 #    st.write(result)
-
