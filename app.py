@@ -1472,7 +1472,7 @@ def main():
 
     # Ensure session state variables exist for the input fields and button
     if 'season' not in st.session_state:
-        st.session_state['season'] = 0
+        st.session_state['season'] = 2024
     if 'team_a' not in st.session_state:
         st.session_state['team_a'] = ""
     if 'team_b' not in st.session_state:
@@ -1485,7 +1485,7 @@ def main():
             st.write("Please enter the following information:")
 
             # Use the session state variables to store input values
-            st.session_state['season'] = st.number_input("Season (Integer)", value=st.session_state['season'])
+            st.session_state['season'] = st.number_input("Season (Integer)", value=st.session_state['season'], min_value=2023, max_value=2024)
             st.session_state['team_a'] = st.text_input("Team A (String)", value=st.session_state['team_a'])
             st.session_state['team_b'] = st.text_input("Team B (String)", value=st.session_state['team_b'])
 
