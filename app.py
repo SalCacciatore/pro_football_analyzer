@@ -1472,7 +1472,7 @@ def main():
 
     # Ensure session state variables exist for the input fields and button
     if 'season' not in st.session_state:
-        st.session_state['season'] = 0
+        st.session_state['season'] = 2024
     if 'team_a' not in st.session_state:
         st.session_state['team_a'] = ""
     if 'team_b' not in st.session_state:
