@@ -1270,7 +1270,7 @@ def get_off_stats(team,data,last_or_this):
 
         rec_data = szn_receivers.reset_index()
     
-        team_receiving = rec_data[rec_data['posteam']==team]
+        team_receiving = rec_data[rec_data['posteam']==team].loc[:, ~data.columns.duplicated()]
         return df, team_passing, team_rushing, team_receiving
     if last_or_this == 'last':
         return df, team_passing, team_rushing
