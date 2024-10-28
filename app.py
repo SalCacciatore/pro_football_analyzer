@@ -1478,37 +1478,57 @@ def get_team_stats(team, year, data_df, rec_dataframe):
 
 # Streamlit app
 def main():
-
-
     # Create a select box for user to choose between Preview and Review
-    choice = st.selectbox("Select an Option", ["Preview", "Review","Team Analysis"])
+    choice = st.selectbox("Select an Option", ["Preview", "Review", "Team Analysis"])
+
+    # Ensure session state variables exist for the input fields and button
+    if 'season' not in st.session_state:
+        st.session_state['season'] = 0
+    if 'team_a' not in st.session_state:
+        st.session_state['team_a'] = ""
+    if 'team_b' not in st.session_state:
+        st.session_state['team_b'] = ""
+    if 'confirm_clicked' not in st.session_state:
+        st.session_state['confirm_clicked'] = False
 
     if choice == "Preview":
         with st.container():
             st.write("Please enter the following information:")
-            season = st.number_input("Season (Integer)")
-            team_a = st.text_input("Team A (String)")
-            team_b = st.text_input("Team B (String)")
 
-            # Create a button to confirm the selection
+            # Use the session state variables to store input values
+            st.session_state['season'] = st.number_input("Season (Integer)", value=st.session_state['season'])
+            st.session_state['team_a'] = st.text_input("Team A (String)", value=st.session_state['team_a'])
+            st.session_state['team_b'] = st.text_input("Team B (String)", value=st.session_state['team_b'])
+
+            # Confirm selection button updates session state to indicate selection is confirmed
             if st.button("Confirm Selection"):
-                if season and team_a and team_b:
-                    # Call the overall_creator function and display the result
-                    overall_result = overall_creator(season, team_a, team_b)
-                    overall_result2 = overall_creator(season, team_b, team_a)
-                    pass_matchup1 = pass_matchup(season, team_a, team_b)
-                    rush_matchup1 = rush_matchup(season, team_a, team_b)
-                    pass_matchup2 = pass_matchup(season, team_b, team_a)
-                    rush_matchup2 = rush_matchup(season, team_b, team_a)
-
-                    st.write(overall_result)
-                    st.write(pass_matchup1)
-                    st.write(rush_matchup1)
-                    st.write(overall_result2)
-                    st.write(pass_matchup2)
-                    st.write(rush_matchup2)
+                # Only proceed if all required fields are filled
+                if st.session_state['season'] and st.session_state['team_a'] and st.session_state['team_b']:
+                    st.session_state['confirm_clicked'] = True
                 else:
                     st.warning("Please enter all required information.")
+
+        # Only run the main logic when the "Confirm Selection" button is clicked
+        if st.session_state['confirm_clicked']:
+            season = st.session_state['season']
+            team_a = st.session_state['team_a']
+            team_b = st.session_state['team_b']
+
+            # Call the overall_creator and matchup functions and display the results
+            overall_result = overall_creator(season, team_a, team_b)
+            overall_result2 = overall_creator(season, team_b, team_a)
+            pass_matchup1 = pass_matchup(season, team_a, team_b)
+            rush_matchup1 = rush_matchup(season, team_a, team_b)
+            pass_matchup2 = pass_matchup(season, team_b, team_a)
+            rush_matchup2 = rush_matchup(season, team_b, team_a)
+
+            # Display results
+            st.write(overall_result)
+            st.write(pass_matchup1)
+            st.write(rush_matchup1)
+            st.write(overall_result2)
+            st.write(pass_matchup2)
+            st.write(rush_matchup2)
 
     elif choice == "Review":
         # If "Review" is selected, create a text input for Game ID
