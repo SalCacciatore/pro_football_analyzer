@@ -1261,7 +1261,7 @@ def get_off_stats(team,data,last_or_this):
     team_passing = team_data.groupby('passer_player_name').agg({'pass':'sum','epa':['sum','mean'],'success':'mean','air_yards':'mean', 'cpoe':'mean','touchdown':['sum','mean'],'interception':['sum','mean']})
     team_rushing = team_data.groupby('rusher_player_name').agg({'rush':'sum','epa':['sum','mean'],'success':'mean','yards_gained':['sum','mean']})
     
-    if last_or_this = 'this':
+    if last_or_this == 'this':
         yardage_model, touchdown_model = load_models()
 
     
@@ -1272,7 +1272,7 @@ def get_off_stats(team,data,last_or_this):
     
         team_receiving = rec_data[rec_data['posteam']==team]
         return df, team_passing, team_rushing, team_receiving
-    if last_or_this = 'last':
+    if last_or_this == 'last':
         return df, team_passing, team_rushing
 
 
