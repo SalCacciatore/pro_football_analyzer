@@ -1485,17 +1485,33 @@ def main():
             st.write("Please enter the following information:")
 
             # Use the session state variables to store input values
-            st.session_state['season'] = st.number_input("Season (Integer)", value=st.session_state['season'], min_value=2023, max_value=2024)
-            st.session_state['team_a'] = st.text_input("Team A (String)", value=st.session_state['team_a'])
-            st.session_state['team_b'] = st.text_input("Team B (String)", value=st.session_state['team_b'])
+            season_input = st.number_input("Season (Integer)", 
+                                            value=st.session_state['season'], 
+                                            min_value=2023, max_value=2024)
+            team_a_input = st.text_input("Team A (String)", value=st.session_state['team_a'])
+            team_b_input = st.text_input("Team B (String)", value=st.session_state['team_b'])
 
             # Confirm selection button updates session state to indicate selection is confirmed
             if st.button("Confirm Selection"):
+                # Update session state only when the button is clicked
+                st.session_state['season'] = season_input
+                st.session_state['team_a'] = team_a_input
+                st.session_state['team_b'] = team_b_input
+
                 # Only proceed if all required fields are filled
                 if st.session_state['season'] and st.session_state['team_a'] and st.session_state['team_b']:
                     st.session_state['confirm_clicked'] = True
                 else:
                     st.warning("Please enter all required information.")
+
+        # Only run the main logic when the "Confirm Selection" button is clicked
+        if st.session_state['confirm_clicked']:
+            season = st.session_state['season']
+            team_a = st.session_state['team_a']
+            team_b = st.session_state['team_b']
+            # Proceed with your main logic using the confirmed values
+            st.write(f"Confirmed values - Season: {season}, Team A: {team_a}, Team B: {team_b}")
+
 
         # Only run the main logic when the "Confirm Selection" button is clicked
         if st.session_state['confirm_clicked']:
