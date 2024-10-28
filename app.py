@@ -226,8 +226,12 @@ def wp_graph(dataframe, game_id):
 def game_review(game_id):
 #game_id = '2023_02_MIN_PHI'
 
-    yardage_model, touchdown_model = load_models()
-
+    with open('yardage_model.pkl', 'rb') as file:
+        yardage_model = pickle.load(file)
+    
+    with open('touchdown_model.pkl', 'rb') as file:
+        touchdown_model = pickle.load(file)
+    
     # Load and preprocess data
     data_all = load_data()
     data = preprocess_data(data_all)
