@@ -1359,11 +1359,11 @@ def get_team_stats(team, year):
     previous = year - 1    
     # Load and preprocess data
     data_all = load_data()
-    data = preprocess_data(data_all)
+    data_df = preprocess_data(data_all)
     
     
     
-    data = data[(data['season'] == year) & (data['season_type'] == 'REG')]
+    data = data_df[(data_df['season'] == year) & (data_df['season_type'] == 'REG')]
 
 
 
