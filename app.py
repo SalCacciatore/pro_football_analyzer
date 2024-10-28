@@ -873,7 +873,7 @@ def game_review(game_id):
 header = st.container()
 
 
-def overall_creator(szn, offense, defense):
+def overall_creator(data, szn, offense, defense):
     szn_df = data[data['season']==szn]
 
     szn_df = szn_df.loc[szn_df.season_type=='REG']
@@ -969,7 +969,7 @@ def overall_creator(szn, offense, defense):
 # Display the chart
     return fig
 
-def pass_matchup(szn, offense, defense):
+def pass_matchup(data, szn, offense, defense):
     szn_df = data[data['season']==szn]
 
     szn_df = szn_df.loc[szn_df.season_type=='REG']
@@ -1073,7 +1073,7 @@ def pass_matchup(szn, offense, defense):
 # Display the chart
     return fig
 
-def rush_matchup(szn, offense, defense):
+def rush_matchup(data, szn, offense, defense):
     szn_df = data[data['season']==szn]
 
     szn_df = szn_df.loc[szn_df.season_type=='REG']
@@ -1477,12 +1477,12 @@ def preview_maker(season, team_a, team_b):
     game_by_game_receivers = process_data(data, yardage_model, touchdown_model)
     szn_receivers = aggregate_season_receivers(game_by_game_receivers)
 
-    overall_result = overall_creator(season, team_a, team_b)
-    overall_result2 = overall_creator(season, team_b, team_a)
-    pass_matchup1 = pass_matchup(season, team_a, team_b)
-    rush_matchup1 = rush_matchup(season, team_a, team_b)
-    pass_matchup2 = pass_matchup(season, team_b, team_a)
-    rush_matchup2 = rush_matchup(season, team_b, team_a)
+    overall_result = overall_creator(data, season, team_a, team_b)
+    overall_result2 = overall_creator(data, season, team_b, team_a)
+    pass_matchup1 = pass_matchup(data, season, team_a, team_b)
+    rush_matchup1 = rush_matchup(data, season, team_a, team_b)
+    pass_matchup2 = pass_matchup(data, season, team_b, team_a)
+    rush_matchup2 = rush_matchup(data, season, team_b, team_a)
 
     return overall_result, overall_result2, pass_matchup1, rush_matchup1, pass_matchup2, rush_matchup2
 
