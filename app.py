@@ -1179,16 +1179,8 @@ with header:
     st.write("All data from NFLVerse.")
 
 
-def get_off_stats(team,data):
+def get_off_stats(team,data,last_or_this):
 
-    
-    yardage_model, touchdown_model = load_models()
-
-    
-    game_by_game_receivers = process_data(data, yardage_model, touchdown_model)
-    szn_receivers = aggregate_season_receivers(game_by_game_receivers)
-
-    rec_data = szn_receivers.reset_index()
 
 
 
@@ -1268,8 +1260,20 @@ def get_off_stats(team,data):
 
     team_passing = team_data.groupby('passer_player_name').agg({'pass':'sum','epa':['sum','mean'],'success':'mean','air_yards':'mean', 'cpoe':'mean','touchdown':['sum','mean'],'interception':['sum','mean']})
     team_rushing = team_data.groupby('rusher_player_name').agg({'rush':'sum','epa':['sum','mean'],'success':'mean','yards_gained':['sum','mean']})
-    team_receiving = rec_data[rec_data['posteam']==team]
-    return df, team_passing, team_rushing, team_receiving
+    
+    if last_or_this = 'this':
+        yardage_model, touchdown_model = load_models()
+
+    
+        game_by_game_receivers = process_data(data, yardage_model, touchdown_model)
+        szn_receivers = aggregate_season_receivers(game_by_game_receivers)
+
+        rec_data = szn_receivers.reset_index()
+    
+        team_receiving = rec_data[rec_data['posteam']==team]
+        return df, team_passing, team_rushing, team_receiving
+    if last_or_this = 'last':
+        return df, team_passing, team_rushing
 
 
 def get_def_stats(team,data):
@@ -1368,14 +1372,14 @@ def get_team_stats(team, year):
 
 
 
-    off_df = get_off_stats(team, data)[0]
+    off_df = get_off_stats(team, data,'this')[0]
     year1 = off_df.copy()
 
     off_df = off_df.rename(columns={'Stat':f'{year} {team} Offense'})
 
-    pass_df = get_off_stats(team,data)[1]
-    rush_df = get_off_stats(team,data)[2]
-    rec_df = get_off_stats(team,data)[3]
+    pass_df = get_off_stats(team,data,'this')[1]
+    rush_df = get_off_stats(team,data,'this')[2]
+    rec_df = get_off_stats(team,data,'this')[3]
 
     def_df = get_def_stats(team,data)
     year1_def = def_df.copy()
@@ -1386,7 +1390,7 @@ def get_team_stats(team, year):
 
 
 
-    year2 = get_off_stats(team,last_year_stats)[0]
+    year2 = get_off_stats(team,last_year_stats,'last')[0]
     year2_def = get_def_stats(team,last_year_stats)
 
 
