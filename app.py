@@ -1386,7 +1386,7 @@ def get_team_stats(team, year):
 
 
 
-    year2 = get_off_stats(team,last_year_stats, rec_dataframe)[0]
+    year2 = get_off_stats(team,last_year_stats)[0]
     year2_def = get_def_stats(team,last_year_stats)
 
 
