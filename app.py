@@ -1467,6 +1467,28 @@ def get_team_stats(team, year, data_df, rec_dataframe):
 
 
 
+def preview_maker(season, team_a, team_b):
+    yardage_model, touchdown_model = load_models()
+
+    # Load and preprocess data
+    data_all = load_data()
+    data = preprocess_data(data_all)
+    
+    game_by_game_receivers = process_data(data, yardage_model, touchdown_model)
+    szn_receivers = aggregate_season_receivers(game_by_game_receivers)
+
+    overall_result = overall_creator(season, team_a, team_b)
+    overall_result2 = overall_creator(season, team_b, team_a)
+    pass_matchup1 = pass_matchup(season, team_a, team_b)
+    rush_matchup1 = rush_matchup(season, team_a, team_b)
+    pass_matchup2 = pass_matchup(season, team_b, team_a)
+    rush_matchup2 = rush_matchup(season, team_b, team_a)
+
+    return overall_result, overall_result2, pass_matchup1, rush_matchup1, pass_matchup2, rush_matchup2
+
+
+
+
 # Streamlit app
 def main():
 
@@ -1485,12 +1507,14 @@ def main():
             if st.button("Confirm Selection"):
                 if season and team_a and team_b:
                     # Call the overall_creator function and display the result
-                    overall_result = overall_creator(season, team_a, team_b)
-                    overall_result2 = overall_creator(season, team_b, team_a)
-                    pass_matchup1 = pass_matchup(season, team_a, team_b)
-                    rush_matchup1 = rush_matchup(season, team_a, team_b)
-                    pass_matchup2 = pass_matchup(season, team_b, team_a)
-                    rush_matchup2 = rush_matchup(season, team_b, team_a)
+                    
+                    overall_result, overalll_result2, pass_matchup1, rush_matchup1,pass_matchup2, rush_matchup2 = preview_maker(season, team_a, team_b)
+                    # overall_result = overall_creator(season, team_a, team_b)
+                    # overall_result2 = overall_creator(season, team_b, team_a)
+                    # pass_matchup1 = pass_matchup(season, team_a, team_b)
+                    # rush_matchup1 = rush_matchup(season, team_a, team_b)
+                    # pass_matchup2 = pass_matchup(season, team_b, team_a)
+                    # rush_matchup2 = rush_matchup(season, team_b, team_a)
 
                     st.write(overall_result)
                     st.write(pass_matchup1)
