@@ -842,7 +842,7 @@ def game_review(game_id):
     rush_show = game[game['rush']==1].groupby('posteam').agg({'rush':'sum','epa':['mean','sum'],'success':'mean','yards_gained':['mean','sum','max'],'turnover':'sum','20+_play':'sum'}).round(2)
 
 # %%
-    rushers = game[game['rush']==1].groupby('rusher_player_name').agg({'posteam':'max','rush':'sum','epa':'sum','success':'mean','yards_gained':'sum','turnover':'sum','touchdown':'sum','goal_to_go':'sum','20+_play':'sum'}).round(2).sort_values(['posteam','rush'],ascending=False)
+    #rushers = game[game['rush']==1].groupby('rusher_player_name').agg({'posteam':'max','rush':'sum','epa':'sum','success':'mean','yards_gained':'sum','turnover':'sum','touchdown':'sum','goal_to_go':'sum','20+_play':'sum'}).round(2).sort_values(['posteam','rush'],ascending=False)
 
 # %%
     game_receivers = game_by_game_receivers.reset_index()
@@ -862,8 +862,8 @@ def game_review(game_id):
 #
 
 
-    return st.write(game_db1), st.write(win_prob), st.plotly_chart(points_fig), st.plotly_chart(fig2), st.plotly_chart(fig3), st.write(pass_show), st.plotly_chart(fig5), st.plotly_chart(home_pass), st.plotly_chart(away_pass), st.write(length_show),st.write(qb_show), st.write(rush_show), st.plotly_chart(host_rush), st.plotly_chart(visitor_rush), st.write(rushers), st.write(receiver_show),st.write(misc_show) ;
-
+    return st.write(game_db1), st.write(win_prob), st.plotly_chart(points_fig), st.plotly_chart(fig2), st.plotly_chart(fig3), st.write(pass_show), st.plotly_chart(fig5), st.plotly_chart(home_pass), st.plotly_chart(away_pass), st.write(length_show),st.write(qb_show), st.write(rush_show), st.plotly_chart(host_rush), st.plotly_chart(visitor_rush), st.write(receiver_show),st.write(misc_show)
+    # st.write(rushers)
 # %%
 header = st.container()
 
