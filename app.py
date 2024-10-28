@@ -18,38 +18,40 @@ import plotly.graph_objects as go
 
 
 # %%
+data_all = pd.DataFrame()
+
+def calculate_seconds(row):
+    if row['qtr'] != 5:
+        return 3600 - row['game_seconds_remaining']
+    else:
+        return 600 - row['game_seconds_remaining'] + 3600
 
 
-YEARS = [2023, 2024]
+def get_quarter_value(dataf):
+    if 'END QUARTER' in dataf['desc']:
+        return dataf['level_0']
+    else:
+        return None
 
-# Cache the model loading functions
-@st.cache_resource
-def load_yardage_model():
-    with open('yardage_model.pkl', 'rb') as file:
-        return pickle.load(file)
+for i in YEARS:  
+    i_data = pd.read_csv('https://github.com/nflverse/nflverse-data/releases/download/pbp/' \
+                   'play_by_play_' + str(i) + '.csv.gz',
+                   compression= 'gzip', low_memory= False)
 
-@st.cache_resource
-def load_touchdown_model():
-    with open('touchdown_model.pkl', 'rb') as file:
-        return pickle.load(file)
+    data_all = pd.concat([data_all,i_data])
 
-# Load models using the cached functions
-yardage_model = load_yardage_model()
-touchdown_model = load_touchdown_model()
 
-# Cache the data loading and preprocessing function
-@st.cache_data
-def load_and_process_data():
-    data_all = pd.DataFrame()
+#data = data_all.loc[data_all.season_type=='REG']
+data = data_all.loc[(data_all.play_type.isin(['no_play','pass','run'])) & (data_all.epa.isna()==False)]
+data.loc[data['pass']==1, 'play_type'] = 'pass'
+data.loc[data.rush==1, 'play_type'] = 'run'
+data.reset_index(drop=True, inplace=True)
+#data.loc[:, 'turnover'] = data['interception'] + data['fumble_lost']
+data = data.dropna(subset=['posteam'])
+#data['goal_to_go'] = (data['yardline_100'] < 10).astype(int)
 
-    # Load and concatenate data for each year
-    for i in YEARS:  
-        i_data = pd.read_csv(
-            'https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_' + str(i) + '.csv.gz',
-            compression='gzip', low_memory=False
-        )
-        data_all = pd.concat([data_all, i_data])
 
+<<<<<<< HEAD
     # Filter and preprocess data
     data = data_all.loc[
         (data_all.play_type.isin(['no_play', 'pass', 'run'])) & 
@@ -83,6 +85,25 @@ def load_and_process_data():
 # Load and process data using the cached function
 data = load_and_process_data()[0]
 data_all = load_and_process_data()[1]
+=======
+new_columns_data = pd.DataFrame({
+    'turnover': data['interception'] + data['fumble_lost'],
+    '20+_play': (data['yards_gained'] > 19).astype(int),
+    'short_pass': (data['air_yards'] < 10).astype(int),
+    'medium_pass': ((data['air_yards'] > 9) & (data['air_yards'] < 20)).astype(int),
+    'deep_pass': (data['air_yards'] > 19).astype(int),
+    'fantasy_points': (
+        data['complete_pass'] * 1 +  # 1 point per completion
+        data['touchdown'] * 6 +       # 6 points per touchdown
+        data['yards_gained'] * 0.1     # 0.1 points per yard gained
+    ),
+    'end_zone_target': (data['yardline_100'] - data['air_yards']) <= 0,
+    'distance_to_EZ_after_target': data['yardline_100'] - data['air_yards'],
+    'goal_to_go': (data['yardline_100'] < 10).astype(int)
+})
+# Concatenate the new columns to the original DataFrame
+data = pd.concat([data, new_columns_data], axis=1)
+>>>>>>> parent of 3782997 (Adding caching to improve performance)
 
 
 @st.cache_data
