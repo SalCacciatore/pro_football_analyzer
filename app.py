@@ -79,7 +79,7 @@ def process_data(data, yardage_model, touchdown_model):
             throws = offense[['complete_pass', 'incomplete_pass', 'interception']].sum().sum()
             team_air_yards = offense['air_yards'].sum()
 
-            receivers = offense.groupby(['receiver_player_name', 'posteam', 'game_id', 'week'])[['pass', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'touchdown', 'xTDs', 'end_zone_target']].sum()
+            receivers = offense.groupby(['receiver_player_name', 'posteam', 'game_id', 'week'])[['pass', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'touchdown', 'xTDs', 'end_zone_target','fumble_lost']].sum()
             receivers['team_attempts'] = throws
             receivers['team_air_yards'] = team_air_yards
             
@@ -98,7 +98,7 @@ def process_data(data, yardage_model, touchdown_model):
 # Aggregating season receivers
 #@st.cache_data
 def aggregate_season_receivers(game_by_game_receivers):
-    szn_receivers = game_by_game_receivers.reset_index().groupby(['receiver_player_name', 'posteam'])[['targets', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'touchdown', 'xTDs', 'end_zone_target', 'team_attempts', 'team_air_yards']].sum()
+    szn_receivers = game_by_game_receivers.reset_index().groupby(['receiver_player_name', 'posteam'])[['targets', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'touchdown', 'xTDs', 'end_zone_target', 'fumble_lost', 'team_attempts', 'team_air_yards']].sum()
     
     szn_receivers['target_share'] = round(szn_receivers['targets'] / szn_receivers['team_attempts'], 3)
     szn_receivers['air_yards_share'] = round(szn_receivers['air_yards'] / szn_receivers['team_air_yards'], 3)
@@ -153,6 +153,7 @@ def preprocess_data(data):
         'deep_pass': (data['air_yards'] > 19).astype(int),
         'fantasy_points': (
             data['complete_pass'] * 1 +  # 1 point per completion
+            data['fumble_lost'] * -2 +
             data['touchdown'] * 6 +       # 6 points per touchdown
             data['yards_gained'] * 0.1     # 0.1 points per yard gained
         ),
@@ -852,7 +853,7 @@ def game_review(game_id):
 # %%
     game_receivers = game_by_game_receivers.reset_index()
     game_receivers['aDOT'] = round(game_receivers['air_yards']/game_receivers['targets'],1)
-    receiver_show = game_receivers[game_receivers['game_id']==game_id].sort_values(['posteam','xFPs'],ascending=False)[['receiver_player_name','posteam','fantasy_points','xFPs','WOPR','targets','target_share','complete_pass','cp', 'yards_gained','xYards', 'aDOT', 'touchdown','xTDs','end_zone_target']]
+    receiver_show = game_receivers[game_receivers['game_id']==game_id].sort_values(['posteam','xFPs'],ascending=False)[['receiver_player_name','posteam','fantasy_points','xFPs','WOPR','targets','target_share','complete_pass','cp', 'yards_gained','xYards', 'aDOT', 'touchdown','xTDs','end_zone_target','fumble_lost']]
     receiver_show[['xFPs', 'xYards', 'xTDs','cp']] = receiver_show[['xFPs', 'xYards', 'xTDs','cp']].round(1)
     #[['receiver_player_name','posteam','WOPR','target_share','targets','complete_pass','yards_gained','aDOT','touchdown','goal_to_go']].round(2)
 
