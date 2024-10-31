@@ -853,7 +853,7 @@ def game_review(game_id):
 # %%
     game_receivers = game_by_game_receivers.reset_index()
     game_receivers['aDOT'] = round(game_receivers['air_yards']/game_receivers['targets'],1)
-    receiver_show = game_receivers[game_receivers['game_id']==game_id].sort_values(['posteam','xFPs'],ascending=False)[['receiver_player_name','posteam','fantasy_points','xFPs','WOPR','targets','target_share','complete_pass','cp', 'yards_gained','xYards', 'aDOT', 'touchdown','xTDs','end_zone_target','fumble_lost']]
+    receiver_show = game_receivers[game_receivers['game_id']==game_id].sort_values(['posteam','xFPs'],ascending=False)[['receiver_player_name','posteam','fantasy_points','xFPs','WOPR','targets','target_share','complete_pass','cp', 'yards_gained','xYards', 'aDOT', 'touchdown','xTDs','end_zone_target','GRAMLWA']]
     receiver_show[['xFPs', 'xYards', 'xTDs','cp']] = receiver_show[['xFPs', 'xYards', 'xTDs','cp']].round(1)
     #[['receiver_player_name','posteam','WOPR','target_share','targets','complete_pass','yards_gained','aDOT','touchdown','goal_to_go']].round(2)
 
