@@ -1546,17 +1546,30 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     data = data[data['season']==2024]
     data = data[data['two_point_attempt']==0]
 
-    data['total_plays'] = data['pass'] + data['rush']
+    #data['turnover'] = data['interception'] + data['fumble_lost']
+    data = data.dropna(subset=['posteam'])
     data['inside_10'] = (data['yardline_100'] < 10).astype(int)
+    data['20+_play'] = (data['yards_gained'] > 19).astype(int)
+    data['short_pass'] = (data['air_yards'] < 10).astype(int)
+    data['medium_pass'] = ((data['air_yards'] > 9)&(data['air_yards']<20)).astype(int)
+    data['deep_pass'] = (data['air_yards'] > 19).astype(int)
+    data['end_zone_target'] = (data['yardline_100'] - data['air_yards']) <= 0
+
+    #data['distance_to_EZ_after_target'] = data['yardline_100'] - data['air_yards']
     data['home_implied_total'] = abs(data['total_line'] / 2 + data['spread_line'] / 2)
     data['away_implied_total'] = abs(data['total_line'] / 2 - data['spread_line'] / 2)
-    data['implied_posteam_total'] = [
-    total_finder(has_ball, home_number, away_number)
-        for has_ball, home_number, away_number in zip(data['posteam_type'], data['home_implied_total'], data['away_implied_total'])
-    ]
-    
+    data.reset_index(drop=True, inplace=True)
+
+    data = data[data['two_point_attempt']==0]
+
+    data['total_plays'] = data['pass'] + data['rush']
+
+    # derive implied team total from betting market data
     data['home_implied_total'] = abs(data['total_line'] / 2 + data['spread_line'] / 2)
     data['away_implied_total'] = abs(data['total_line'] / 2 - data['spread_line'] / 2)
+    data = data[(data['play_type']=='pass')|(data['play_type']=='run')]
+
+
 
 
     #sample = data[data['week']>=starting_week].groupby('posteam').agg({'pass':'mean','total_plays':'sum','pass_oe':'mean','game_id':'nunique'})
