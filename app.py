@@ -1773,8 +1773,8 @@ def main():
     elif choice == "Receiving Yards Simulation":
         with st.container():
             st.write("Please enter the following information:")
-            spread = st.number_input("Season")
-            total = st.number_input("Season")
+            spread = st.number_input("Season",key="number_input_1")
+            total = st.number_input("Season",key="number_input_2")
             chosen_team = st.text_input("Team")
             receiver_name = st.text_input("Receiver Name")
             excluded_receiver1 = st.text_input("Excluded Receiver","")
