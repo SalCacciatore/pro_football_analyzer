@@ -1533,7 +1533,7 @@ def total_finder(home_or_away,home_total,away_total):
     return total
 
 
-def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name):
+def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week):
 
     yardage_model, touchdown_model, pass_volume_model = load_models()
 
@@ -1559,10 +1559,10 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     data['away_implied_total'] = abs(data['total_line'] / 2 - data['spread_line'] / 2)
 
 
-    sample = data[data['week']>5].groupby('posteam').agg({'pass':'mean','total_plays':'sum','pass_oe':'mean','game_id':'nunique'})
+    sample = data[data['week']>starting_week].groupby('posteam').agg({'pass':'mean','total_plays':'sum','pass_oe':'mean','game_id':'nunique'})
 
 
-    sample = data[data['week']>5].groupby('posteam').agg(
+    sample = data[data['week']>starting_week].groupby('posteam').agg(
     pass_total=('pass', 'sum'),
     pass_rate=('pass', 'mean'),
     pass_oe=('pass_oe', 'mean'),
@@ -1598,7 +1598,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     xYards_sd = current_szn[current_szn['receiver_player_name']==receiver_name]['xYards'].std()
 
 
-    team_period = current_szn[(current_szn['posteam']==chosen_team)&(current_szn['week']>5)].groupby('receiver_player_name').agg({'pass':'sum','xYards':'sum','game_id':'nunique','yards_gained':'sum'})
+    team_period = current_szn[(current_szn['posteam']==chosen_team)&(current_szn['week']>=starting_week)].groupby('receiver_player_name').agg({'pass':'sum','xYards':'sum','game_id':'nunique','yards_gained':'sum'})
 
 
     team_targets = team_period[team_period.index!=excluded_receiver1]
@@ -1801,11 +1801,13 @@ def main():
             receiver_name = st.text_input("Receiver Name",key="name_input_1")
             excluded_receiver1 = st.text_input("Excluded Receiver","",key="name_input_2")
             excluded_receiver2 = st.text_input("Excluded Receiver","",key="name_input_3")
+            starting_week = st.number_input("Starting Week",key="number_input_2")
+
 
             
             
             if st.button("Submit"):
-                team_rec_df, rec_df, receiver_string, median_yards, results = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name)
+                team_rec_df, rec_df, receiver_string, median_yards, results = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week)
                 st.write(team_rec_df)
                 st.write(rec_df)
                 st.write(receiver_string)
