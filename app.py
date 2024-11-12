@@ -1644,7 +1644,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
 
 
-    return team_rec_df, rec_df, receiver_string, median_yards, results
+    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts
 
 
 
@@ -1807,9 +1807,10 @@ def main():
             
             
             if st.button("Submit"):
-                team_rec_df, rec_df, receiver_string, median_yards, results = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week)
+                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week)
                 st.write(team_rec_df)
                 st.write(rec_df)
+                st.write(f"Predicted team attempts: {team_attempts}")
                 st.write(receiver_string)
                 st.write(median_yards)
                 st.write(results)
