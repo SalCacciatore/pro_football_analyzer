@@ -1776,9 +1776,9 @@ def main():
             spread = st.number_input("Season",key="number_input_1")
             total = st.number_input("Season",key="number_input_2")
             chosen_team = st.text_input("Team")
-            receiver_name = st.text_input("Receiver Name")
-            excluded_receiver1 = st.text_input("Excluded Receiver","")
-            excluded_receiver2 = st.text_input("Excluded Receiver","")
+            receiver_name = st.text_input("Receiver Name",key="name_input_1")
+            excluded_receiver1 = st.text_input("Excluded Receiver","",key="name_input_2")
+            excluded_receiver2 = st.text_input("Excluded Receiver","",key="name_input_3")
 
             
             
