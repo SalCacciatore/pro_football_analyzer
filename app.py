@@ -1541,7 +1541,8 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
 
     data_all = load_data()
-
+    data = data_all.loc[data_all.season_type=='REG']
+    data = data[data['season'] == 2024]
     data.reset_index(drop=True, inplace=True)
     data['turnover'] = data['interception'] + data['fumble_lost']
     data = data.dropna(subset=['posteam'])
@@ -1553,7 +1554,6 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     data['end_zone_target'] = (data['yardline_100'] - data['air_yards']) <= 0
 
     data['distance_to_EZ_after_target'] = data['yardline_100'] - data['air_yards']
-
     data.reset_index(drop=True, inplace=True)
 
     data = data[data['two_point_attempt']==0]
@@ -1569,6 +1569,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     total_finder(has_ball, home_number, away_number)
         for has_ball, home_number, away_number in zip(data['posteam_type'], data['home_implied_total'], data['away_implied_total'])
     ]
+
 
 
     #sample = data[data['week']>=starting_week].groupby('posteam').agg({'pass':'mean','total_plays':'sum','pass_oe':'mean','game_id':'nunique'})
