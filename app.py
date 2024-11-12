@@ -1601,7 +1601,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     team_df = df_creator(sample,chosen_team,spread,total)
     
-    if attempts_input != 0:
+    if attempts_input == 0:
         predicted_attempts = pass_volume_model.predict(team_df[['trailing_pass_total','trailing_pass_avg','trailing_pass_oe_avg','trailing_total_plays_avg','total_line','pos_team_total','pos_spread']])[0]
     else:
         predicted_attempts = attempts_input
