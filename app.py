@@ -1533,7 +1533,7 @@ def total_finder(home_or_away,home_total,away_total):
     return total
 
 
-def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week):
+def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,attempts_input):
 
     yardage_model, touchdown_model, pass_volume_model = load_models()
 
@@ -1601,7 +1601,11 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     team_df = df_creator(sample,chosen_team,spread,total)
     
-    predicted_attempts = pass_volume_model.predict(team_df[['trailing_pass_total','trailing_pass_avg','trailing_pass_oe_avg','trailing_total_plays_avg','total_line','pos_team_total','pos_spread']])[0]
+    if attempts_input != 0:
+        predicted_attempts = pass_volume_model.predict(team_df[['trailing_pass_total','trailing_pass_avg','trailing_pass_oe_avg','trailing_total_plays_avg','total_line','pos_team_total','pos_spread']])[0]
+    else:
+        predicted_attempts = attempts_input
+
 
     new_columns_current = predict_columns(df, yardage_model, touchdown_model)
     current_szn = pd.concat([df, new_columns_current], axis=1)
@@ -1815,19 +1819,18 @@ def main():
             excluded_receiver1 = st.text_input("Excluded Receiver","",key="name_input_2")
             excluded_receiver2 = st.text_input("Excluded Receiver","",key="name_input_3")
             starting_week = st.number_input("Starting Week",key="number_input_3")
+            team_attempts = st.number_input("Team Attempts (leave '0' for model to predict attempts)",key="number_input_4")
 
-
-            
-            
+                    
             if st.button("Submit"):
-                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week)
+                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts)
                 st.write(team_rec_df)
                 st.write(rec_df)
                 st.write(f"Predicted team attempts: {team_attempts}")
                 st.write(receiver_string)
                 st.write(median_yards)
                 st.write(results)
-
+                
 
 
 if __name__ == "__main__":
