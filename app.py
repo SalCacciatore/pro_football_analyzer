@@ -10,6 +10,7 @@ import plotly.graph_objects as go
 import streamlit as st
 import pandas as pd
 import pickle
+from typing import Tuple, List
 
 # Caching models
 #@st.cache_resource
@@ -20,7 +21,11 @@ def load_models():
     with open('touchdown_model.pkl', 'rb') as file:
         touchdown_model = pickle.load(file)
 
-    return yardage_model, touchdown_model
+
+    with open('Receiving_Yards_Predictor/pass_volume_model.pkl', 'rb') as file:
+        pass_volume_model = pickle.load(file)
+
+    return yardage_model, touchdown_model, pass_volume_model
 
 
 
@@ -1508,6 +1513,187 @@ def preview_maker(season, team_a, team_b):
 
     return overall_result, overall_result2, pass_matchup1, rush_matchup1, pass_matchup2, rush_matchup2
 
+def df_creator(sample_df, team,spread,total):
+    team_df = sample_df[sample_df.index==team]
+    team_total = total/2 - spread/2
+
+
+    team_df['total_line'] = total
+    team_df['pos_team_total'] = team_total
+    team_df['pos_spread'] = spread
+
+    return team_df
+
+
+
+
+def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name):
+
+    yardage_model, touchdown_model, pass_volume_model = load_models()
+
+
+
+
+    data_all = load_data()
+    data = preprocess_data(data_all)
+
+    sample = data[data['week']>5].groupby('posteam').agg({'pass':'mean','total_plays':'sum','pass_oe':'mean','game_id':'nunique'})
+
+
+    sample = data[data['week']>5].groupby('posteam').agg(
+    pass_total=('pass', 'sum'),
+    pass_rate=('pass', 'mean'),
+    pass_oe=('pass_oe', 'mean'),
+    plays=('total_plays', 'sum'),
+    game_id = ('game_id','nunique'))
+
+
+    sample['trailing_total_plays_avg'] = sample['plays']/sample['game_id']
+    sample['pass_total'] = sample['pass_total']/sample['game_id']
+
+    sample = sample.rename(columns={'pass_rate':'trailing_pass_avg','pass_total':'trailing_pass_total','pass_oe':'trailing_pass_oe_avg'})
+
+    throws = data[data['air_yards'].notna()]
+
+    throws = throws[throws['receiver_player_name'].notna()]
+    throws = throws[throws['pass_location'].notna()]
+
+    
+    df = throws[['receiver_player_name','receiver_player_id','posteam','pass','cp','game_id','complete_pass','inside_10','air_yards','yardline_100','ydstogo','implied_posteam_total','yards_gained','fantasy_points','pass_touchdown','down','pass_location','week','season','home_implied_total','away_implied_total','posteam_type','qb_hit','end_zone_target', 'distance_to_EZ_after_target']]
+
+
+
+
+    team_df = df_creator(sample,chosen_team,spread,total)
+    
+    predicted_attempts = pass_volume_model.predict(team_df[['trailing_pass_total','trailing_pass_avg','trailing_pass_oe_avg','trailing_total_plays_avg','total_line','pos_team_total','pos_spread']])[0]
+
+    new_columns_current = predict_columns(df, yardage_model, touchdown_model)
+    current_szn = pd.concat([df, new_columns_current], axis=1)
+
+    xYardsmean = current_szn[current_szn['receiver_player_name']==receiver_name]['xYards'].mean()
+
+    xYards_sd = current_szn[current_szn['receiver_player_name']==receiver_name]['xYards'].std()
+
+
+    team_period = current_szn[(current_szn['posteam']==chosen_team)&(current_szn['week']<5)].groupby('receiver_player_name').agg({'pass':'sum','xYards':'sum','game_id':'nunique','yards_gained':'sum'})
+
+
+    team_targets = team_period[team_period.index!=excluded_receiver1]
+
+    team_targets = team_targets[team_targets.index!=excluded_receiver2]['pass'].sum()
+
+
+    team_period['target_share'] = team_period['pass']/team_targets
+
+    team_period['xYards_game'] = team_period['xYards']/team_period['game_id']
+
+    team_period['yards_game'] = team_period['yards_gained']/team_period['game_id']
+
+    team_rec_df = team_period.round(2).sort_values('xYards_game',ascending=False)[['game_id','pass','target_share','xYards','xYards_game','yards_game']]
+
+
+    rec_target_share = team_period[team_period.index == receiver_name]['target_share'].values[0]
+
+    rec_df = current_szn[(current_szn['receiver_player_name']==receiver_name)&(current_szn['posteam']==chosen_team)].groupby('week').agg({'pass':'sum','xYards':'sum','yards_gained':'sum'}).round(1)
+
+    receiver_string = (f"Season median: {rec_df['xYards'].median()}; Last four games median: {rec_df.tail(4)['xYards'].median()}")
+
+    team_passes = predicted_attempts 
+    player_target_rate = rec_target_share 
+    yards_per_target_mean = xYardsmean
+    yards_per_target_std = xYards_sd
+    
+    # Run simulation
+    targets, yards = simulate_receiver_game(
+        team_pass_attempts=team_passes,
+        target_rate=player_target_rate,
+        yards_mean=yards_per_target_mean,
+        yards_std=yards_per_target_std
+    )
+    
+    # Analyze results
+    results = analyze_simulation_results(predicted_attempts,targets, yards)
+    
+    median_yards = f"Median Yards: {results['median_yards']:.1f}"
+
+
+
+
+
+
+    return team_rec_df, rec_df, receiver_string, median_yards, results
+
+
+
+def simulate_receiver_game(
+    team_pass_attempts: int,
+    target_rate: float,
+    yards_mean: float,
+    yards_std: float,
+    num_simulations: int = 1000
+) -> Tuple[List[int], List[float]]:
+    """
+    Simulate receiving statistics for a player based on team passing attempts and player metrics.
+    
+    Args:
+        team_pass_attempts: Number of team pass attempts
+        target_rate: Rate at which player is targeted (between 0 and 1)
+        yards_mean: Mean yards per target
+        yards_std: Standard deviation of yards per target
+        num_simulations: Number of games to simulate
+        
+    Returns:
+        Tuple containing:
+        - List of targets for each simulation
+        - List of receiving yards for each simulation
+    """
+    
+    simulated_targets = []
+    simulated_yards = []
+    
+    for _ in range(num_simulations):
+        # Simulate targets using binomial distribution
+        targets = np.random.binomial(n=team_pass_attempts, p=target_rate)
+        
+        # Simulate yards for each target using normal distribution
+        if targets > 0:
+            yards = np.random.normal(yards_mean, yards_std, targets)
+            # Round to 1 decimal place and ensure no negative yards
+            yards = np.maximum(0, np.round(yards, 1))
+            total_yards = sum(yards)
+        else:
+            total_yards = 0
+            
+        simulated_targets.append(targets)
+        simulated_yards.append(total_yards)
+    
+    return simulated_targets, simulated_yards
+
+def analyze_simulation_results(
+    predicted_attempts,
+    targets: List[int],
+    yards: List[float]
+) -> dict:
+    """
+    Analyze the results of the simulation.
+    
+    Args:
+        targets: List of simulated target counts
+        yards: List of simulated receiving yards
+        
+    Returns:
+        Dictionary containing summary statistics
+    """
+    return {
+        'avg_targets': np.mean(targets),
+        'median_targets': np.median(targets),
+        'target_share': round(np.mean(targets)/predicted_attempts,3),
+        'target_percentiles': np.percentile(targets, [10, 25, 75, 90]),
+        'avg_yards': np.mean(yards),
+        'median_yards': np.median(yards),
+        'yard_percentiles': np.percentile(yards, [10, 25, 75, 90])
+    }
 
 
 
@@ -1516,7 +1702,7 @@ def main():
 
 
     # Create a select box for user to choose between Preview and Review
-    choice = st.selectbox("Select an Option", ["Preview", "Review","Team Analysis"])
+    choice = st.selectbox("Select an Option", ["Preview", "Review","Team Analysis","Receiving Yards Simulation"])
 
     if choice == "Preview":
         with st.container():
@@ -1583,6 +1769,28 @@ def main():
 
             else:
                 st.warning("Please enter valid inputs.")
+
+    elif choice == "Receiving Yards Simulation":
+        with st.container():
+            st.write("Please enter the following information:")
+            spread = st.number_input("Season")
+            total = st.number_input("Season")
+            chosen_team = st.text_input("Team")
+            receiver_name = st.text_input("Receiver Name")
+            excluded_receiver1 = st.text_input("Excluded Receiver","")
+            excluded_receiver2 = st.text_input("Excluded Receiver","")
+
+            
+            
+            if st.button("Submit"):
+                team_rec_df, rec_df, receiver_string, median_yards, results = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name)
+                st.write(team_rec_df)
+                st.write(rec_df)
+                st.write(receiver_string)
+                st.write(median_yards)
+                st.write(results)
+
+
 
 if __name__ == "__main__":
     main()
