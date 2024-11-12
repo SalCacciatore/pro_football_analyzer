@@ -1591,13 +1591,13 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     sample = sample.rename(columns={'pass_rate':'trailing_pass_avg','pass_total':'trailing_pass_total','pass_oe':'trailing_pass_oe_avg'})
 
-    throws = data[data['air_yards'].notna()]
+    #throws = data[data['air_yards'].notna()]
 
-    throws = throws[throws['receiver_player_name'].notna()]
-    throws = throws[throws['pass_location'].notna()]
+    #throws = throws[throws['receiver_player_name'].notna()]
+    #throws = throws[throws['pass_location'].notna()]
 
     
-    df = throws[['receiver_player_name','receiver_player_id','posteam','pass','cp','game_id','complete_pass','inside_10','air_yards','yardline_100','ydstogo','implied_posteam_total','yards_gained','fantasy_points','pass_touchdown','down','pass_location','week','season','home_implied_total','away_implied_total','posteam_type','qb_hit','end_zone_target', 'distance_to_EZ_after_target']]
+    df = sample[['receiver_player_name','receiver_player_id','posteam','pass','cp','game_id','complete_pass','inside_10','air_yards','yardline_100','ydstogo','implied_posteam_total','yards_gained','fantasy_points','pass_touchdown','down','pass_location','week','season','home_implied_total','away_implied_total','posteam_type','qb_hit','end_zone_target', 'distance_to_EZ_after_target']]
 
 
 
