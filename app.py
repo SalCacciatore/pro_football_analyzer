@@ -1525,7 +1525,12 @@ def df_creator(sample_df, team,spread,total):
 
     return team_df
 
-
+def total_finder(home_or_away,home_total,away_total):
+    if home_or_away == 'home':
+        total = home_total
+    else:
+        total = away_total 
+    return total
 
 
 def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name):
@@ -1542,7 +1547,16 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     data = data[data['two_point_attempt']==0]
 
     data['total_plays'] = data['pass'] + data['rush']
+    data['inside_10'] = (data['yardline_100'] < 10).astype(int)
+    data['implied_posteam_total'] = [
+    total_finder(has_ball, home_number, away_number)
+        for has_ball, home_number, away_number in zip(data['posteam_type'], data['home_implied_total'], data['away_implied_total'])
+    ]
     
+    data['home_implied_total'] = abs(data['total_line'] / 2 + data['spread_line'] / 2)
+    data['away_implied_total'] = abs(data['total_line'] / 2 - data['spread_line'] / 2)
+
+
     sample = data[data['week']>5].groupby('posteam').agg({'pass':'mean','total_plays':'sum','pass_oe':'mean','game_id':'nunique'})
 
 
