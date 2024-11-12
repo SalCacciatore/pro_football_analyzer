@@ -1548,6 +1548,8 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     data['total_plays'] = data['pass'] + data['rush']
     data['inside_10'] = (data['yardline_100'] < 10).astype(int)
+    data['home_implied_total'] = abs(data['total_line'] / 2 + data['spread_line'] / 2)
+    data['away_implied_total'] = abs(data['total_line'] / 2 - data['spread_line'] / 2)
     data['implied_posteam_total'] = [
     total_finder(has_ball, home_number, away_number)
         for has_ball, home_number, away_number in zip(data['posteam_type'], data['home_implied_total'], data['away_implied_total'])
