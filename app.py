@@ -232,7 +232,7 @@ def wp_graph(dataframe, game_id):
 def game_review(game_id):
 #game_id = '2023_02_MIN_PHI'
 
-    yardage_model, touchdown_model = load_models()
+    yardage_model, touchdown_model = load_models()[:2]
 
     # Load and preprocess data
     data_all = load_data()
@@ -1268,7 +1268,7 @@ def get_off_stats(team,data,last_or_this):
     team_rushing = team_data.groupby('rusher_player_name').agg({'rush':'sum','epa':['sum','mean'],'success':'mean','yards_gained':['sum','mean']})
     
     if last_or_this == 'this':
-        yardage_model, touchdown_model = load_models()
+        yardage_model, touchdown_model = load_models()[0:2]
 
     
         game_by_game_receivers = process_data(data, yardage_model, touchdown_model)
@@ -1495,7 +1495,6 @@ def get_team_stats(team, year):
 
 
 def preview_maker(season, team_a, team_b):
-    #yardage_model, touchdown_model = load_models()
 
     # Load and preprocess data
     data_all = load_data()
