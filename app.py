@@ -1543,7 +1543,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     data_all = load_data()
     data = preprocess_data(data_all)
 
-    data[data['season']==2024]
+    data = data[data['season']==2024]
     data = data[data['two_point_attempt']==0]
 
     data['total_plays'] = data['pass'] + data['rush']
