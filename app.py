@@ -1501,9 +1501,6 @@ def preview_maker(season, team_a, team_b):
     data_all = load_data()
     data = preprocess_data(data_all)
     
-    data = data[data['two_point_attempt']==0]
-
-    data['total_plays'] = data['pass'] + data['rush']
 
     #game_by_game_receivers = process_data(data, yardage_model, touchdown_model)
     #szn_receivers = aggregate_season_receivers(game_by_game_receivers)
@@ -1541,6 +1538,11 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     data_all = load_data()
     data = preprocess_data(data_all)
 
+
+    data = data[data['two_point_attempt']==0]
+
+    data['total_plays'] = data['pass'] + data['rush']
+    
     sample = data[data['week']>5].groupby('posteam').agg({'pass':'mean','total_plays':'sum','pass_oe':'mean','game_id':'nunique'})
 
 
