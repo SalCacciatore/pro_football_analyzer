@@ -1556,9 +1556,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     data['end_zone_target'] = (data['yardline_100'] - data['air_yards']) <= 0
 
     #data['distance_to_EZ_after_target'] = data['yardline_100'] - data['air_yards']
-    data['home_implied_total'] = abs(data['total_line'] / 2 + data['spread_line'] / 2)
-    data['away_implied_total'] = abs(data['total_line'] / 2 - data['spread_line'] / 2)
-    data.reset_index(drop=True, inplace=True)
+
 
     data = data[data['two_point_attempt']==0]
 
@@ -1568,6 +1566,11 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     data['home_implied_total'] = abs(data['total_line'] / 2 + data['spread_line'] / 2)
     data['away_implied_total'] = abs(data['total_line'] / 2 - data['spread_line'] / 2)
     data = data[(data['play_type']=='pass')|(data['play_type']=='run')]
+    # Use list comprehension with zip for more efficient row-wise operations
+    data['implied_posteam_total'] = [
+    total_finder(has_ball, home_number, away_number)
+        for has_ball, home_number, away_number in zip(data['posteam_type'], data['home_implied_total'], data['away_implied_total'])
+]
 
 
 
