@@ -1541,12 +1541,9 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
 
     data_all = load_data()
-    data = preprocess_data(data_all)
 
-    data = data[data['season']==2024]
-    data = data[data['two_point_attempt']==0]
-
-    #data['turnover'] = data['interception'] + data['fumble_lost']
+    data.reset_index(drop=True, inplace=True)
+    data['turnover'] = data['interception'] + data['fumble_lost']
     data = data.dropna(subset=['posteam'])
     data['inside_10'] = (data['yardline_100'] < 10).astype(int)
     data['20+_play'] = (data['yards_gained'] > 19).astype(int)
@@ -1555,8 +1552,9 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     data['deep_pass'] = (data['air_yards'] > 19).astype(int)
     data['end_zone_target'] = (data['yardline_100'] - data['air_yards']) <= 0
 
-    #data['distance_to_EZ_after_target'] = data['yardline_100'] - data['air_yards']
+    data['distance_to_EZ_after_target'] = data['yardline_100'] - data['air_yards']
 
+    data.reset_index(drop=True, inplace=True)
 
     data = data[data['two_point_attempt']==0]
 
@@ -1570,9 +1568,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     data['implied_posteam_total'] = [
     total_finder(has_ball, home_number, away_number)
         for has_ball, home_number, away_number in zip(data['posteam_type'], data['home_implied_total'], data['away_implied_total'])
-]
-
-
+    ]
 
 
     #sample = data[data['week']>=starting_week].groupby('posteam').agg({'pass':'mean','total_plays':'sum','pass_oe':'mean','game_id':'nunique'})
@@ -1591,13 +1587,13 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     sample = sample.rename(columns={'pass_rate':'trailing_pass_avg','pass_total':'trailing_pass_total','pass_oe':'trailing_pass_oe_avg'})
 
-    #throws = data[data['air_yards'].notna()]
+    throws = data[data['air_yards'].notna()]
 
-    #throws = throws[throws['receiver_player_name'].notna()]
-    #throws = throws[throws['pass_location'].notna()]
+    throws = throws[throws['receiver_player_name'].notna()]
+    throws = throws[throws['pass_location'].notna()]
 
     
-    df = sample[['receiver_player_name','receiver_player_id','posteam','pass','cp','game_id','complete_pass','inside_10','air_yards','yardline_100','ydstogo','implied_posteam_total','yards_gained','fantasy_points','pass_touchdown','down','pass_location','week','season','home_implied_total','away_implied_total','posteam_type','qb_hit','end_zone_target', 'distance_to_EZ_after_target']]
+    df = throws[['receiver_player_name','receiver_player_id','posteam','pass','cp','game_id','complete_pass','inside_10','air_yards','yardline_100','ydstogo','implied_posteam_total','yards_gained','fantasy_points','pass_touchdown','down','pass_location','week','season','home_implied_total','away_implied_total','posteam_type','qb_hit','end_zone_target', 'distance_to_EZ_after_target']]
 
 
 
