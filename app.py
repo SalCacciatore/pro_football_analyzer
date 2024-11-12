@@ -1501,6 +1501,10 @@ def preview_maker(season, team_a, team_b):
     data_all = load_data()
     data = preprocess_data(data_all)
     
+    data = data[data['two_point_attempt']==0]
+
+    data['total_plays'] = data['pass'] + data['rush']
+
     #game_by_game_receivers = process_data(data, yardage_model, touchdown_model)
     #szn_receivers = aggregate_season_receivers(game_by_game_receivers)
 
@@ -1773,7 +1777,7 @@ def main():
     elif choice == "Receiving Yards Simulation":
         with st.container():
             st.write("Please enter the following information:")
-            spread = st.number_input("Spraed",key="number_input_1")
+            spread = st.number_input("Spread",key="number_input_1")
             total = st.number_input("Total",key="number_input_2")
             chosen_team = st.text_input("Team")
             receiver_name = st.text_input("Receiver Name",key="name_input_1")
