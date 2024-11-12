@@ -1801,7 +1801,7 @@ def main():
             receiver_name = st.text_input("Receiver Name",key="name_input_1")
             excluded_receiver1 = st.text_input("Excluded Receiver","",key="name_input_2")
             excluded_receiver2 = st.text_input("Excluded Receiver","",key="name_input_3")
-            starting_week = st.number_input("Starting Week",key="number_input_2")
+            starting_week = st.number_input("Starting Week",key="number_input_3")
 
 
             
