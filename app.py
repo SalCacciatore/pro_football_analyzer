@@ -1559,7 +1559,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     data['away_implied_total'] = abs(data['total_line'] / 2 - data['spread_line'] / 2)
 
 
-    sample = data[data['week']>starting_week].groupby('posteam').agg({'pass':'mean','total_plays':'sum','pass_oe':'mean','game_id':'nunique'})
+    sample = data[data['week']>=starting_week].groupby('posteam').agg({'pass':'mean','total_plays':'sum','pass_oe':'mean','game_id':'nunique'})
 
 
     sample = data[data['week']>starting_week].groupby('posteam').agg(
