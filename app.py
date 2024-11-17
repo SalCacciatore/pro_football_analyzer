@@ -1558,8 +1558,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     data = data[data['two_point_attempt']==0]
 
     data['total_plays'] = data['pass'] + data['rush']
-
-    # derive implied team total from betting market data
+    data.loc[data['receiver_player_name'].isna()==False, 'target']=1    # derive implied team total from betting market data
     data['home_implied_total'] = abs(data['total_line'] / 2 + data['spread_line'] / 2)
     data['away_implied_total'] = abs(data['total_line'] / 2 - data['spread_line'] / 2)
     data = data[(data['play_type']=='pass')|(data['play_type']=='run')]
@@ -1575,6 +1574,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
 
     sample = data[data['week']>=starting_week].groupby('posteam').agg(
+    target_total = ('target','sum'),
     pass_total=('pass', 'sum'),
     pass_rate=('pass', 'mean'),
     pass_oe=('pass_oe', 'mean'),
@@ -1593,7 +1593,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     throws = throws[throws['pass_location'].notna()]
 
     
-    df = throws[['receiver_player_name','receiver_player_id','posteam','pass','cp','game_id','complete_pass','inside_10','air_yards','yardline_100','ydstogo','implied_posteam_total','yards_gained','pass_touchdown','down','pass_location','week','season','home_implied_total','away_implied_total','posteam_type','qb_hit','end_zone_target', 'distance_to_EZ_after_target']]
+    df = throws[['receiver_player_name','receiver_player_id','posteam','pass','cp','game_id','complete_pass','inside_10','air_yards','yardline_100','ydstogo','implied_posteam_total','yards_gained','pass_touchdown','down','pass_location','week','season','home_implied_total','away_implied_total','posteam_type','qb_hit','end_zone_target', 'distance_to_EZ_after_target','target_total']]
 
 
 
