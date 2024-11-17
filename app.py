@@ -1558,7 +1558,9 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     data = data[data['two_point_attempt']==0]
 
     data['total_plays'] = data['pass'] + data['rush']
-    data.loc[data['receiver_player_name'].isna()==False, 'target']=1    # derive implied team total from betting market data
+    data.loc[data['receiver_player_name'].isna()==False, 'target']=1   
+    
+    # derive implied team total from betting market data
     data['home_implied_total'] = abs(data['total_line'] / 2 + data['spread_line'] / 2)
     data['away_implied_total'] = abs(data['total_line'] / 2 - data['spread_line'] / 2)
     data = data[(data['play_type']=='pass')|(data['play_type']=='run')]
@@ -1591,9 +1593,10 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     throws = throws[throws['receiver_player_name'].notna()]
     throws = throws[throws['pass_location'].notna()]
+    throws.loc[throws['receiver_player_name'].isna()==False, 'target']=1   
 
     
-    df = throws[['receiver_player_name','receiver_player_id','posteam','pass','cp','game_id','complete_pass','inside_10','air_yards','yardline_100','ydstogo','implied_posteam_total','yards_gained','pass_touchdown','down','pass_location','week','season','home_implied_total','away_implied_total','posteam_type','qb_hit','end_zone_target', 'distance_to_EZ_after_target','target_total']]
+    df = throws[['receiver_player_name','receiver_player_id','posteam','pass','cp','game_id','complete_pass','inside_10','air_yards','yardline_100','ydstogo','implied_posteam_total','yards_gained','pass_touchdown','down','pass_location','week','season','home_implied_total','away_implied_total','posteam_type','qb_hit','end_zone_target', 'distance_to_EZ_after_target','target']]
 
 
 
@@ -1822,7 +1825,7 @@ def main():
             excluded_receiver1 = st.text_input("Excluded Receiver","",key="name_input_2")
             excluded_receiver2 = st.text_input("Excluded Receiver","",key="name_input_3")
             starting_week = st.number_input("Starting Week",key="number_input_3")
-            team_attempts = st.number_input("Team Attempts (leave '0' for model to predict attempts)",key="number_input_4")
+            team_attempts = st.number_input("Team Targets (leave '0' for model to predict targets)",key="number_input_4")
 
                     
             if st.button("Submit"):
@@ -1830,7 +1833,7 @@ def main():
                 st.write(team_rec_df)
                 st.write(rec_df)
                 st.write(f"Predicted team targets: {team_attempts}")
-                st.write(f":Team targets in period {team_targets_in_period}")
+                st.write(f":Team targets per game in period {team_targets_in_period}")
                 st.write(receiver_string)
                 st.write(median_yards)
                 st.write(results)
