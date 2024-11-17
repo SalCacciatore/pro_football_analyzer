@@ -1617,6 +1617,10 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     xYards_sd = current_szn[current_szn['receiver_player_name']==receiver_name]['xYards'].std()
 
 
+    szn_stats = current_szn[(current_szn['posteam']==chosen_team)].groupby('receiver_player_name').agg({'pass':'sum','xYards':'sum','game_id':'nunique','yards_gained':'sum','target':'sum'})
+
+    szn_targets_per_game = szn_stats['target'].sum()/szn_stats['game_id'].nunique()
+
     team_period = current_szn[(current_szn['posteam']==chosen_team)&(current_szn['week']>=starting_week)].groupby('receiver_player_name').agg({'pass':'sum','xYards':'sum','game_id':'nunique','yards_gained':'sum','target':'sum'})
 
     period_targets_per_game = team_period['target'].sum()/team_period['game_id'].nunique()
@@ -1667,7 +1671,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
 
 
-    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game
+    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game
 
 
 
@@ -1829,11 +1833,13 @@ def main():
 
                     
             if st.button("Submit"):
-                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts, team_targets_in_period = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts)
+                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts, team_targets_in_period, szn_targets_per_game = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts)
                 st.write(team_rec_df)
                 st.write(rec_df)
                 st.write(f"Predicted team targets: {team_attempts}")
                 st.write(f"Team targets per game in period {team_targets_in_period}")
+                st.write(f"Team targets per game this season {szn_targets_per_game}")
+
                 st.write(receiver_string)
                 st.write(median_yards)
                 st.write(results)
