@@ -1688,7 +1688,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
             throws = offense[['complete_pass', 'incomplete_pass', 'interception']].sum().sum()
             team_air_yards = offense['air_yards'].sum()
 
-            receivers = offense.groupby(['receiver_player_name', 'posteam', 'game_id', 'week'])[['pass','complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards']].sum()
+            receivers = offense.groupby(['receiver_player_name', 'posteam', 'game_id', 'week'])[['pass','complete_pass', 'cp', 'yards_gained']].sum()
             receivers['team_attempts'] = throws
             receivers['team_air_yards'] = team_air_yards
             
