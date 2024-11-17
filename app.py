@@ -1617,7 +1617,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     xYards_sd = current_szn[current_szn['receiver_player_name']==receiver_name]['xYards'].std()
 
 
-    team_period = current_szn[(current_szn['posteam']==chosen_team)&(current_szn['week']>=starting_week)].groupby('receiver_player_name').agg({'pass':'sum','xYards':'sum','game_id':'nunique','yards_gained':'sum'})
+    team_period = current_szn[(current_szn['posteam']==chosen_team)&(current_szn['week']>=starting_week)].groupby('receiver_player_name').agg({'pass':'sum','xYards':'sum','game_id':'nunique','yards_gained':'sum','target':'sum'})
 
     period_targets_per_game = team_period['target'].sum()/team_period['game_id'].nunique()
 
