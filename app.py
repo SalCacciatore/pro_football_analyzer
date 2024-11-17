@@ -1667,11 +1667,44 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     median_yards = f"Median Yards: {results['median_yards']:.1f}"
 
 
+    # get game by game data
+    rec_data = data[data['air_yards'].notna() & data['receiver_player_name'].notna()]
+    current_szn_1 = rec_data[rec_data['season'] == 2024]
+    
+    
+    games = current_szn_1['game_id'].unique()
+    receivers_list = []
+
+    for game in games:
+        current_game = current_szn_1[current_szn_1['game_id'] == game]
+        teams = current_game['posteam'].unique()
+
+        for team in teams:
+            offense = current_game[(current_game['posteam'] == team) & (current_game['pass'] == 1) & (current_game['play_type'] == 'pass')]
+            
+            if offense.empty:
+                continue  # Skip if there's no offense data
+
+            throws = offense[['complete_pass', 'incomplete_pass', 'interception']].sum().sum()
+            team_air_yards = offense['air_yards'].sum()
+
+            receivers = offense.groupby(['receiver_player_name', 'posteam', 'game_id', 'week'])[['pass','complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards']].sum()
+            receivers['team_attempts'] = throws
+            receivers['team_air_yards'] = team_air_yards
+            
+            receivers_list.append(receivers)
+
+    # Concatenate all receivers data at once
+    game_by_game_receivers = pd.concat(receivers_list).rename(columns={'pass': 'targets'})
+
+    # Calculate shares and WOPR
+    game_by_game_receivers['target_share'] = round(game_by_game_receivers['targets'] / game_by_game_receivers['team_attempts'], 3)
 
 
 
 
-    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game
+
+    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game, game_by_game_receivers.head(25)
 
 
 
@@ -1833,7 +1866,7 @@ def main():
 
                     
             if st.button("Submit"):
-                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts, team_targets_in_period, szn_targets_per_game = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts)
+                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts, team_targets_in_period, szn_targets_per_game, dta = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts)
                 st.write(team_rec_df)
                 st.write(rec_df)
                 st.write(f"Predicted team targets: {team_attempts}")
@@ -1843,6 +1876,8 @@ def main():
                 st.write(receiver_string)
                 st.write(median_yards)
                 st.write(results)
+                st.write(dta)
+                st.write(list(dta.index))
                 
 
 
