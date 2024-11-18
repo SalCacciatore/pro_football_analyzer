@@ -1534,7 +1534,6 @@ def total_finder(home_or_away,home_total,away_total):
 
 def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,trailing_games,attempts_input):
 
-    starting_week = (data[data['posteam']==chosen_team]['week'].max() - trailing_games)+1
 
     yardage_model, touchdown_model, pass_volume_model = load_models()
 
@@ -1544,6 +1543,9 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     data_all = load_data()
     data = data_all.loc[data_all.season_type=='REG']
     data = data[data['season'] == 2024]
+
+    starting_week = (data[data['posteam']==chosen_team]['week'].max() - trailing_games)+1
+
     data.reset_index(drop=True, inplace=True)
     data['turnover'] = data['interception'] + data['fumble_lost']
     data = data.dropna(subset=['posteam'])
