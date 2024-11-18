@@ -1698,6 +1698,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     rec_target_share = individual_period['targets'].sum()/individual_period['team_attempts'].sum()
 
+    st.write(f'tttttttttttarget share: {rec_target_share}')
     
 
 
