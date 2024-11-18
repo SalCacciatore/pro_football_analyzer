@@ -1692,14 +1692,11 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
 
 
-    individual_period = rec_df.copy().dropna()
+    individual_period = rec_df.copy()
 
-    #individual_period = individual_period
-    
-    
-    #.tail(starting_week)
+    individual_period = individual_period.tail(starting_week)
 
-    rec_target_share = individual_period['targets'].sum()/individual_period['team_attempts']
+    rec_target_share = individual_period['targets'].sum()/individual_period['team_attempts'].sum()
 
     
 
