@@ -1692,7 +1692,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
 
 
-    individual_period = rec_df.copy()
+    individual_period = rec_df.copy().dropna()
 
     #individual_period = individual_period
     
