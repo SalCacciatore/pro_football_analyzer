@@ -1690,7 +1690,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
             receivers = offense.groupby(['receiver_player_name', 'posteam', 'game_id', 'week'])[['pass','complete_pass', 'cp', 'yards_gained']].sum()
             receivers['team_attempts'] = throws
-            receivers['team_air_yards'] = team_air_yards
+            #receivers['team_air_yards'] = team_air_yards
             
             receivers_list.append(receivers)
 
@@ -1700,11 +1700,13 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     # Calculate shares and WOPR
     game_by_game_receivers['target_share'] = round(game_by_game_receivers['targets'] / game_by_game_receivers['team_attempts'], 3)
 
+    individual_df = game_by_game_receivers.reset_index()
+    individual_df = individual_df[individual_df['receiver_player_name']==receiver_name]
 
 
 
 
-    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game, game_by_game_receivers.head(25)
+    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game, indidivudal_df
 
 
 
