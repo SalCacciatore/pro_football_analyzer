@@ -1698,7 +1698,6 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     rec_target_share = individual_period['targets'].sum()/individual_period['team_attempts'].sum()
 
-    st.write(f'tttttttttttarget share: {rec_target_share}')
     
 
 
@@ -1724,7 +1723,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
 
 
-    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game
+    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game, rec_target_share
 
 
 
@@ -1886,12 +1885,13 @@ def main():
 
                     
             if st.button("Submit"):
-                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts, team_targets_in_period, szn_targets_per_game = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts)
+                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts, team_targets_in_period, szn_targets_per_game, t_share = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts)
                 st.write(team_rec_df)
                 st.write(rec_df)
                 st.write(f"Predicted team targets: {team_attempts}")
                 st.write(f"Team targets per game in period {team_targets_in_period}")
                 st.write(f"Team targets per game this season {szn_targets_per_game}")
+                st.write(f"Target share in last {starting_week} games: {t_share}")
                 st.write(receiver_string)
                 st.write(median_yards)
                 st.write(results)
