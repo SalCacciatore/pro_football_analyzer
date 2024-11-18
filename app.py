@@ -1706,7 +1706,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
 
 
-    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game, indidivudal_df
+    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game, individual_df
 
 
 
