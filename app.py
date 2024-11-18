@@ -1885,7 +1885,7 @@ def main():
             excluded_receiver2 = st.text_input("Excluded Receiver","",key="name_input_3")
             starting_week = st.number_input("Number of Trailing Weeks",key="number_input_3")
             team_attempts = st.number_input("Team Targets (leave '0' for model to predict targets)",key="number_input_4")
-            player_target_share = st.number_input("Player Target Targets (leave '0' for model to use average target share over trailing games window)",key="number_input_5")
+            player_target_share = st.number_input("Player Target Share (leave '0' for model to use average target share over trailing games window)",key="number_input_5")
 
                     
             if st.button("Submit"):
@@ -1895,7 +1895,7 @@ def main():
                 st.write(f"Predicted team targets: {team_attempts}")
                 st.write(f"Team targets per game in period {team_targets_in_period}")
                 st.write(f"Team targets per game this season {szn_targets_per_game}")
-                st.write(f"Target share in last {starting_week} games: {t_share}")
+                st.write(f"Target share: {t_share}")
                 st.write(receiver_string)
                 st.write(median_yards)
                 st.write(results)
