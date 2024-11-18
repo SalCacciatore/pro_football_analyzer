@@ -1703,7 +1703,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     individual_df = game_by_game_receivers.reset_index()
     individual_df = individual_df[individual_df['receiver_player_name']==receiver_name]
 
-    rec_df = rec_df.merge(individual_df,on='week')[['week','game_id','targets','xYards','yards_gained_x','target_share','team_attempts']].set_index('week').rename(colums={'yars_gained_x':'yards_gained'})
+    rec_df = rec_df.merge(individual_df,on='week')[['week','game_id','targets','xYards','yards_gained_x','target_share','team_attempts']].set_index('week').rename(columns={'yars_gained_x':'yards_gained'})
 
 
 
