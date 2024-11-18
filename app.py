@@ -1617,9 +1617,13 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     xYards_sd = current_szn[current_szn['receiver_player_name']==receiver_name]['xYards'].std()
 
 
-    szn_stats = current_szn[(current_szn['posteam']==chosen_team)].groupby('receiver_player_name').agg({'pass':'sum','xYards':'sum','game_id':'nunique','yards_gained':'sum','target':'sum'})
+    #szn_stats = current_szn[(current_szn['posteam']==chosen_team)].groupby('receiver_player_name').agg({'pass':'sum','xYards':'sum','game_id':'nunique','yards_gained':'sum','target':'sum'})
 
-    szn_targets_per_game = szn_stats['target'].sum()/szn_stats['game_id'].nunique()
+    szn_targets_per_game = current_szn['target'].sum()/current_szn['game_id'].nunique()
+
+
+
+
 
     team_period = current_szn[(current_szn['posteam']==chosen_team)&(current_szn['week']>=starting_week)].groupby('receiver_player_name').agg({'pass':'sum','xYards':'sum','game_id':'nunique','yards_gained':'sum','target':'sum'})
 
@@ -1704,7 +1708,6 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     individual_df = individual_df[individual_df['receiver_player_name']==receiver_name]
 
     rec_df = rec_df.merge(individual_df,on='week')[['week','game_id','targets','xYards','yards_gained_x','target_share','team_attempts']].set_index('week').rename(columns={'yards_gained_x':'yards_gained'})
-
 
 
     return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game
