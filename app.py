@@ -1532,7 +1532,9 @@ def total_finder(home_or_away,home_total,away_total):
     return total
 
 
-def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,attempts_input):
+def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,trailing_games,attempts_input):
+
+    starting_week = (data[data['posteam']==chosen_team]['week'].max() - trailing_games)+1
 
     yardage_model, touchdown_model, pass_volume_model = load_models()
 
@@ -1574,8 +1576,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     #sample = data[data['week']>=starting_week].groupby('posteam').agg({'pass':'mean','total_plays':'sum','pass_oe':'mean','game_id':'nunique'})
 
-
-    sample = data[data['week']>=starting_week].groupby('posteam').agg(
+    sample = data[data['week']>=starting_week].groupby('posteam').agg(    
     target_total = ('target','sum'),
     pass_total=('pass', 'sum'),
     pass_rate=('pass', 'mean'),
@@ -1584,8 +1585,11 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     game_id = ('game_id','nunique'))
 
 
+
+
     sample['trailing_total_plays_avg'] = sample['plays']/sample['game_id']
     sample['pass_total'] = sample['pass_total']/sample['game_id']
+
 
     sample = sample.rename(columns={'pass_rate':'trailing_pass_avg','pass_total':'trailing_pass_total','pass_oe':'trailing_pass_oe_avg'})
 
@@ -1643,12 +1647,56 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     team_rec_df = team_period.round(2).sort_values('xYards_game',ascending=False)[['game_id','pass','target_share','xYards','xYards_game','yards_game']]
 
 
-    rec_target_share = team_period[team_period.index == receiver_name]['target_share'].values[0]
 
     rec_df = current_szn[(current_szn['receiver_player_name']==receiver_name)&(current_szn['posteam']==chosen_team)].groupby('week').agg({'pass':'sum','xYards':'sum','yards_gained':'sum'}).round(1)
 
     receiver_string = (f"Season median: {rec_df['xYards'].median()}; Last four games median: {rec_df.tail(4)['xYards'].median()}")
 
+    # get game by game data
+    rec_data = data[data['air_yards'].notna() & data['receiver_player_name'].notna()]
+    current_szn_1 = rec_data[rec_data['season'] == 2024]
+    
+    
+    games = current_szn_1['game_id'].unique()
+    receivers_list = []
+
+    for game in games:
+        current_game = current_szn_1[current_szn_1['game_id'] == game]
+        teams = current_game['posteam'].unique()
+
+        for team in teams:
+            offense = current_game[(current_game['posteam'] == team) & (current_game['pass'] == 1) & (current_game['play_type'] == 'pass')]
+            
+            if offense.empty:
+                continue  # Skip if there's no offense data
+
+            throws = offense[['complete_pass', 'incomplete_pass', 'interception']].sum().sum()
+
+            receivers = offense.groupby(['receiver_player_name', 'posteam', 'game_id', 'week'])[['pass','complete_pass', 'cp', 'yards_gained']].sum()
+            receivers['team_attempts'] = throws
+            
+            receivers_list.append(receivers)
+
+    # Concatenate all receivers data at once
+    game_by_game_receivers = pd.concat(receivers_list).rename(columns={'pass': 'targets'})
+
+    # Calculate shares and WOPR
+    game_by_game_receivers['target_share'] = round(game_by_game_receivers['targets'] / game_by_game_receivers['team_attempts'], 3)
+
+    individual_df = game_by_game_receivers.reset_index()
+    individual_df = individual_df[individual_df['receiver_player_name']==receiver_name]
+
+    rec_df = rec_df.merge(individual_df,on='week')[['week','game_id','targets','xYards','yards_gained_x','target_share','team_attempts']].set_index('week').rename(columns={'yards_gained_x':'yards_gained'})
+
+
+
+    individual_period = rec_df.reset_index()
+
+    individual_period = individual_period[individual_period['week']].tail(starting_week)
+
+    rec_target_share = individual_period['targets'].sum()/individual_period['team_attempts']
+
+    
 
 
 
@@ -1671,43 +1719,6 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     median_yards = f"Median Yards: {results['median_yards']:.1f}"
 
 
-    # get game by game data
-    rec_data = data[data['air_yards'].notna() & data['receiver_player_name'].notna()]
-    current_szn_1 = rec_data[rec_data['season'] == 2024]
-    
-    
-    games = current_szn_1['game_id'].unique()
-    receivers_list = []
-
-    for game in games:
-        current_game = current_szn_1[current_szn_1['game_id'] == game]
-        teams = current_game['posteam'].unique()
-
-        for team in teams:
-            offense = current_game[(current_game['posteam'] == team) & (current_game['pass'] == 1) & (current_game['play_type'] == 'pass')]
-            
-            if offense.empty:
-                continue  # Skip if there's no offense data
-
-            throws = offense[['complete_pass', 'incomplete_pass', 'interception']].sum().sum()
-            team_air_yards = offense['air_yards'].sum()
-
-            receivers = offense.groupby(['receiver_player_name', 'posteam', 'game_id', 'week'])[['pass','complete_pass', 'cp', 'yards_gained']].sum()
-            receivers['team_attempts'] = throws
-            #receivers['team_air_yards'] = team_air_yards
-            
-            receivers_list.append(receivers)
-
-    # Concatenate all receivers data at once
-    game_by_game_receivers = pd.concat(receivers_list).rename(columns={'pass': 'targets'})
-
-    # Calculate shares and WOPR
-    game_by_game_receivers['target_share'] = round(game_by_game_receivers['targets'] / game_by_game_receivers['team_attempts'], 3)
-
-    individual_df = game_by_game_receivers.reset_index()
-    individual_df = individual_df[individual_df['receiver_player_name']==receiver_name]
-
-    rec_df = rec_df.merge(individual_df,on='week')[['week','game_id','targets','xYards','yards_gained_x','target_share','team_attempts']].set_index('week').rename(columns={'yards_gained_x':'yards_gained'})
 
 
     return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game
