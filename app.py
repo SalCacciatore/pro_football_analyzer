@@ -1703,10 +1703,11 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     individual_df = game_by_game_receivers.reset_index()
     individual_df = individual_df[individual_df['receiver_player_name']==receiver_name]
 
+    rec_df = rec_df.merge(individual_df,on='week')
 
 
 
-    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game, individual_df
+    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game
 
 
 
@@ -1868,7 +1869,7 @@ def main():
 
                     
             if st.button("Submit"):
-                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts, team_targets_in_period, szn_targets_per_game, dta = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts)
+                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts, team_targets_in_period, szn_targets_per_game = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts)
                 st.write(team_rec_df)
                 st.write(rec_df)
                 st.write(f"Predicted team targets: {team_attempts}")
@@ -1878,8 +1879,7 @@ def main():
                 st.write(receiver_string)
                 st.write(median_yards)
                 st.write(results)
-                st.write(dta)
-                st.write(list(dta.index))
+ 
                 
 
 
