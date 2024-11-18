@@ -1619,7 +1619,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     #szn_stats = current_szn[(current_szn['posteam']==chosen_team)].groupby('receiver_player_name').agg({'pass':'sum','xYards':'sum','game_id':'nunique','yards_gained':'sum','target':'sum'})
 
-    szn_targets_per_game = current_szn
+    szn_targets_per_game = current_szn.copy()
     
     
     #['target'].sum()/current_szn['game_id'].nunique()
@@ -1880,7 +1880,8 @@ def main():
                 st.write(rec_df)
                 st.write(f"Predicted team targets: {team_attempts}")
                 st.write(f"Team targets per game in period {team_targets_in_period}")
-                st.write(f"Team targets per game this season {szn_targets_per_game}")
+                #st.write(f"Team targets per game this season {szn_targets_per_game}")
+                st.write(szn_targets_per_game)
 
                 st.write(receiver_string)
                 st.write(median_yards)
