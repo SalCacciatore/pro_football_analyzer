@@ -1877,9 +1877,7 @@ def main():
                 st.write(rec_df)
                 st.write(f"Predicted team targets: {team_attempts}")
                 st.write(f"Team targets per game in period {team_targets_in_period}")
-                #st.write(f"Team targets per game this season {szn_targets_per_game}")
-                st.write(szn_targets_per_game)
-
+                st.write(f"Team targets per game this season {szn_targets_per_game}")
                 st.write(receiver_string)
                 st.write(median_yards)
                 st.write(results)
