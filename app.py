@@ -1618,7 +1618,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
 
     szn_stats = current_szn[(current_szn['posteam']==chosen_team)].groupby('receiver_player_name').agg({'pass':'sum','xYards':'sum','game_id':'nunique','yards_gained':'sum','target':'sum'})
-    team_games = current_szn['game_id'].nunique()
+    team_games = current_szn[(current_szn['posteam']==chosen_team)]['game_id'].nunique()
     szn_targets_per_game = szn_stats['target'].sum()/team_games
 
 
