@@ -1757,7 +1757,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     rec_df = current_szn[(current_szn['receiver_player_name']==receiver_name)&(current_szn['posteam']==chosen_team)].groupby('week').agg({'pass':'sum','xYards':'sum','yards_gained':'sum'}).round(1)
 
-    receiver_string = (f"Season median: {round(rec_df['xYards'].median(),1)}; Last four games median: {round(rec_df.tail(4)['xYards'].median(),1)}")
+    receiver_string = (f"Season median: {round(rec_df['xYards'].median(),1)}; Last four games median: {round(rec_df.tail(trailing_games)['xYards'].median(),1)}")
 
     # get game by game data
     rec_data = data[(data['air_yards'].notna()) & (data['receiver_player_name'].notna())]
