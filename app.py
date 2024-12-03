@@ -1822,7 +1822,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     # Analyze results
     results = analyze_simulation_results(predicted_attempts,targets, yards)
     
-    median_yards = f"Median Yards: {results['median_yards']:.1f}"
+    median_yards = f"* Median Yards: {results['median_yards']:.1f}"
 
 
 
@@ -2028,10 +2028,10 @@ def main():
                 st.write(f"Team targets per game this season {szn_targets_per_game}")
                 st.write(f"Target share: {t_share}")
                 st.write(receiver_string)
-                st.write("xYards-based Simulation")
+                st.write("**xYards-based Simulation**")
                 st.write(median_yards)
                 st.write(results)
-                st.write("Air Yards-based simulation")
+                st.write("**Air Yards-based simulation**")
                 st.write(adot_yardage)
                 st.write(above_threshold)
  
