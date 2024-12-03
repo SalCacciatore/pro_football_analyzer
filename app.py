@@ -352,7 +352,7 @@ def game_review(game_id):
 
     all_plays['turnover'] = all_plays['interception'] + all_plays['fumble_lost']
 
-    turnover_plays = all_plays[all_plays['turnover']==1][['posteam','desc','epa','wpa']]
+    turnover_plays = all_plays[all_plays['turnover']==1][['posteam','qtr','desc','epa','wpa']]
 
     all_plays['abs_wpa'] = all_plays['wpa'].apply(lambda x: abs(x))
 
