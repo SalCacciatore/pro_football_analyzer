@@ -245,6 +245,7 @@ def game_review(game_id):
 
 
     game = data[data['game_id']==game_id]
+    
     flu = game[['yardline_100','goal_to_go']].head(50)
 # %%
     host = game['home_team'].max()
