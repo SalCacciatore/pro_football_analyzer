@@ -1648,26 +1648,22 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     starting_week = (data[data['posteam']==chosen_team]['week'].max() - trailing_games)+1
 
     data.reset_index(drop=True, inplace=True)
+    new_columns = pd.DataFrame({
+    'turnover': data['interception'] + data['fumble_lost'],
+    'inside_10': (data['yardline_100'] < 10).astype(int),
+    '20+_play': (data['yards_gained'] > 19).astype(int),
+    'short_pass': (data['air_yards'] < 10).astype(int),
+    'medium_pass': ((data['air_yards'] >= 10) & (data['air_yards'] < 20)).astype(int),
+    'deep_pass': (data['air_yards'] >= 20).astype(int),
+    'end_zone_target': (data['yardline_100'] - data['air_yards'] <= 0).astype(int),
+    'distance_to_EZ_after_target': data['yardline_100'] - data['air_yards']
+    })
 
-# Avoid recalculating the same expressions multiple times
-    data['distance_to_EZ_after_target'] = data['yardline_100'] - data['air_yards']
-
-# Use numpy for condition-based calculations to leverage performance
-    data['turnover'] = data['interception'] + data['fumble_lost']
+# Drop rows with missing 'posteam' first to minimize unnecessary computation
     data = data.dropna(subset=['posteam'])
-    data['inside_10'] = (data['yardline_100'] < 10).astype(int)
-    data['20+_play'] = (data['yards_gained'] > 19).astype(int)
 
-# Combine medium_pass and deep_pass logic using numpy
-    data['short_pass'] = (data['air_yards'] < 10).astype(int)
-    data['medium_pass'] = np.where(
-        (data['air_yards'] >= 10) & (data['air_yards'] < 20), 1, 0
-)
-    data['deep_pass'] = (data['air_yards'] >= 20).astype(int)
-
-# Leverage the precomputed 'distance_to_EZ_after_target' column
-    data['end_zone_target'] = (data['distance_to_EZ_after_target'] <= 0)
-
+# Concatenate all new columns to the original DataFrame at once
+    data = pd.concat([data, new_columns], axis=1)
     data.reset_index(drop=True, inplace=True)
 
     data = data[data['two_point_attempt']==0]
