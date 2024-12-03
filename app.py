@@ -261,7 +261,7 @@ def game_review(game_id):
 
     game['abs_wpa'] = game['wpa'].apply(lambda x: abs(x))
 
-    big_plays = game.sort_values('abs_wpa',ascending=False)[['posteam','desc','epa','abs_wpa','wpa']].head(5)
+    big_plays = game.sort_values('abs_wpa',ascending=False)[['posteam','qtr','desc','epa','abs_wpa','wpa','wp']].head(5)
 
 # %%
     game_db = game.groupby('posteam').agg({'total_points':'max','posteam':'count','epa':['mean','sum'],'success':'mean','pass_oe':'mean','yards_gained':['mean','sum'],'turnover':'sum'}).round(2)
