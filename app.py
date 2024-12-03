@@ -1633,7 +1633,7 @@ def total_finder(home_or_away,home_total,away_total):
     return total
 
 
-def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,trailing_games,attempts_input,target_share_input):
+def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,trailing_games,attempts_input,target_share_input, threshold):
 
 
     yardage_model, touchdown_model, pass_volume_model = load_models()
@@ -1849,7 +1849,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     adot_yardage = "Median Yards: " + str(round(result_df['yards'].median(),1))
 
 
-    threshold = 46.5
+    #threshold = 46.5
     result = percentage_above_threshold(result_df, 'yards', threshold)
     adot_perc_above = (f"Percentage of values above {threshold}: {result:.2f}%")
 
@@ -2016,10 +2016,11 @@ def main():
             starting_week = st.number_input("Number of Trailing Weeks",key="number_input_3")
             team_attempts = st.number_input("Team Targets (leave '0' for model to predict targets)",key="number_input_4")
             player_target_share = st.number_input("Player Target Share (leave '0' for model to use average target share over trailing games window)",key="number_input_5")
+            over_under = st.number_input("Yardage Threshold",key="number_input_6")
 
                     
             if st.button("Submit"):
-                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts, team_targets_in_period, szn_targets_per_game, t_share, adot_yardage, above_threshold = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts,player_target_share)
+                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts, team_targets_in_period, szn_targets_per_game, t_share, adot_yardage, above_threshold = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts,player_target_share,over_under)
                 st.write(team_rec_df)
                 st.write(rec_df)
                 st.write(f"Predicted team targets: {team_attempts}")
