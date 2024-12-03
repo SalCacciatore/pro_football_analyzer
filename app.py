@@ -256,12 +256,14 @@ def game_review(game_id):
 
     game['total_points'] = game['posteam'].map(score_dict).astype(int)
 
+    all_plays = data_all[data_all['game_id']==game_id]
 
-    turnover_plays = game[game['turnover']==1][['posteam','desc','epa','wpa']]
 
-    game['abs_wpa'] = game['wpa'].apply(lambda x: abs(x))
+    turnover_plays = all_plays[all_plays['turnover']==1][['posteam','desc','epa','wpa']]
 
-    big_plays = game.sort_values('abs_wpa',ascending=False)[['posteam','qtr','desc','wpa','wp','epa']].head(5)
+    all_plays['abs_wpa'] = all_plays['wpa'].apply(lambda x: abs(x))
+
+    big_plays = all_plays.sort_values('abs_wpa',ascending=False)[['posteam','qtr','desc','wpa','wp','epa']].head(5).rename(columns={'wp':'home_team_wp'})
 
 # %%
     game_db = game.groupby('posteam').agg({'total_points':'max','posteam':'count','epa':['mean','sum'],'success':'mean','pass_oe':'mean','yards_gained':['mean','sum'],'turnover':'sum'}).round(2)
