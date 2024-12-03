@@ -257,7 +257,7 @@ def game_review(game_id):
     game['total_points'] = game['posteam'].map(score_dict).astype(int)
 
 
-    turnover_plays = game[game['turnover']==1][['posteam','desc','interception','fumble_lost','epa','wp']]
+    turnover_plays = game[game['turnover']==1][['posteam','desc','epa','wpa']]
 
     game['abs_wpa'] = game['wpa'].apply(lambda x: abs(x))
 
@@ -880,7 +880,7 @@ def game_review(game_id):
 #
 
 
-    return st.write(game_db1), st.write(win_prob), st.write(turnover_plays), st.write('Big Plays'),st.write(big_plays), st.plotly_chart(points_fig), st.plotly_chart(fig2), st.plotly_chart(fig3), st.write(pass_show), st.plotly_chart(fig5), st.plotly_chart(home_pass), st.plotly_chart(away_pass), st.write(length_show),st.write(qb_show), st.write(rush_show), st.plotly_chart(host_rush), st.plotly_chart(visitor_rush), st.write(receiver_show), st.write(rushers), st.write(misc_show)
+    return st.write(game_db1), st.write(win_prob), st.write('Big Plays'),st.write(big_plays), st.write(turnover_plays), st.plotly_chart(points_fig), st.plotly_chart(fig2), st.plotly_chart(fig3), st.write(pass_show), st.plotly_chart(fig5), st.plotly_chart(home_pass), st.plotly_chart(away_pass), st.write(length_show),st.write(qb_show), st.write(rush_show), st.plotly_chart(host_rush), st.plotly_chart(visitor_rush), st.write(receiver_show), st.write(rushers), st.write(misc_show)
 # %%
 header = st.container()
 
