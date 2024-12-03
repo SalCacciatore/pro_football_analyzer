@@ -1858,7 +1858,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     adot_perc_above = (f"* Percentage of simulation above {threshold}: {result:.2f}%")
 
 
-    return team_rec_df, rec_df, receiver_string, median_yards, results[0], predicted_attempts, period_targets_per_game, szn_targets_per_game, rec_target_share, adot_yardage, adot_perc_above
+    return team_rec_df, rec_df, receiver_string, median_yards, results[0], round(predicted_attempts,1), period_targets_per_game, szn_targets_per_game, rec_target_share, adot_yardage, adot_perc_above
 
 
 
@@ -2040,7 +2040,7 @@ def main():
                 team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts, team_targets_in_period, szn_targets_per_game, t_share, adot_yardage, above_threshold = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts,player_target_share,over_under)
                 st.write(team_rec_df)
                 st.write(rec_df)
-                st.write(f"Predicted team targets: {round(team_attempts,1)}")
+                st.write(f"Predicted team targets: {team_attempts}")
                 st.write(f"Team targets per game in period {round(team_targets_in_period,1)}")
                 st.write(f"Team targets per game this season {round(szn_targets_per_game,1)}")
                 st.write(f"Target share: {round(t_share,3)}")
