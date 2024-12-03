@@ -1820,7 +1820,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     )
     
     # Analyze results
-    results = analyze_simulation_results(predicted_attempts,targets, yards)
+    results = analyze_simulation_results(threshold, predicted_attempts,targets, yards)
     
     median_yards = f"* Median Yards: {results['median_yards']:.1f}"
 
