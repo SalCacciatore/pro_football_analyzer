@@ -1928,7 +1928,7 @@ def analyze_simulation_results(
     perc = percentage_above_threshold(result_df, 'yards', threshold)
 
 
-    return f"Percentage above {threshold}': perc", f"Median_yards: {np.median(yards)}"
+    return f"Percentage above {threshold}: {perc}", f"Median_yards: {np.median(yards)}"
 
 
 
