@@ -1787,11 +1787,14 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     # Concatenate all receivers data at once
     game_by_game_receivers = pd.concat(receivers_list).rename(columns={'pass': 'targets'})
 
-    # Calculate shares and WOPR
+    # Calculate shares
     game_by_game_receivers['target_share'] = round(game_by_game_receivers['targets'] / game_by_game_receivers['team_attempts'], 3)
 
     individual_df = game_by_game_receivers.reset_index()
     individual_df = individual_df[(individual_df['receiver_player_name']==receiver_name)&(individual_df['posteam']==chosen_team)]
+
+
+
 
     rec_df = rec_df.merge(individual_df,on='week')[['week','game_id','targets','xYards','yards_gained_x','target_share','team_attempts']].set_index('week').rename(columns={'yards_gained_x':'yards_gained'})
 
@@ -1799,7 +1802,13 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     individual_period = rec_df.copy()
 
+
     individual_period = individual_period.tail(int(trailing_games))
+
+    individual_period = individual_period[individual_period['receiver_player_name']!=excluded_receiver1]
+
+    individual_period = individual_period[individual_period['receiver_player_name']!=excluded_receiver2]
+
 
     if target_share_input == 0:
         rec_target_share = individual_period['targets'].sum()/individual_period['team_attempts'].sum()
