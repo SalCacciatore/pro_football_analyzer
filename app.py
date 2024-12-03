@@ -1928,7 +1928,7 @@ def analyze_simulation_results(
     perc = percentage_above_threshold(result_df, 'yards', threshold)
 
     return {
-        'Percentage above {threshold}': perc,
+        f'Percentage above {threshold}': perc,
         'avg_targets': np.mean(targets),
         'median_targets': np.median(targets),
         'target_share': round(np.mean(targets)/predicted_attempts,3),
