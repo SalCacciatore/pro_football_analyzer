@@ -1822,7 +1822,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     # Analyze results
     results = analyze_simulation_results(threshold, predicted_attempts,targets, yards)
     
-    median_yards = f"* Median Yards: {results['median_yards']:.1f}"
+    median_yards = results[1]
 
 
 
@@ -1854,7 +1854,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     adot_perc_above = (f"* Percentage of values above {threshold}: {result:.2f}%")
 
 
-    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game, rec_target_share, adot_yardage, adot_perc_above
+    return team_rec_df, rec_df, receiver_string, median_yards, results[0], predicted_attempts, period_targets_per_game, szn_targets_per_game, rec_target_share, adot_yardage, adot_perc_above
 
 
 
@@ -1927,16 +1927,20 @@ def analyze_simulation_results(
     result_df['yards'] = yards
     perc = percentage_above_threshold(result_df, 'yards', threshold)
 
-    return {
-        f'Percentage above {threshold}': perc,
-        'avg_targets': np.mean(targets),
-        'median_targets': np.median(targets),
-        'target_share': round(np.mean(targets)/predicted_attempts,3),
-        'target_percentiles': np.percentile(targets, [10, 25, 75, 90]),
-        'avg_yards': np.mean(yards),
-        'median_yards': np.median(yards),
-        'yard_percentiles': np.percentile(yards, [10, 25, 75, 90])
-    }
+
+    return f"Percentage above {threshold}': perc", f"Median_yards: {np.median(yards)}"
+
+
+
+    #return {
+    #    f'Percentage above {threshold}': perc,
+    #    'avg_targets': np.mean(targets),
+    #    'median_targets': np.median(targets),
+    #    'target_share': round(np.mean(targets)/predicted_attempts,3),
+    #    'target_percentiles': np.percentile(targets, [10, 25, 75, 90]),
+    #    'avg_yards': np.mean(yards),
+    #    'median_yards': np.median(yards),
+    #    'yard_percentiles': np.percentile(yards, [10, 25, 75, 90])}
 
 
 
@@ -2058,3 +2062,4 @@ if __name__ == "__main__":
 #if st.button('Submit'):
 #    result = game_review(input_string)
 #    st.write(result)
+# %%
