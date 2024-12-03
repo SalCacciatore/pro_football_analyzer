@@ -1846,12 +1846,12 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     result_df['receptions'] = catch_
     result_df['yards'] = yardage_
 
-    adot_yardage = "Median Yards: " + str(round(result_df['yards'].median(),1))
+    adot_yardage = "* Median Yards: " + str(round(result_df['yards'].median(),1))
 
 
     #threshold = 46.5
     result = percentage_above_threshold(result_df, 'yards', threshold)
-    adot_perc_above = (f"Percentage of values above {threshold}: {result:.2f}%")
+    adot_perc_above = (f"* Percentage of values above {threshold}: {result:.2f}%")
 
 
     return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game, rec_target_share, adot_yardage, adot_perc_above
