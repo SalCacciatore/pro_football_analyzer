@@ -1827,7 +1827,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     result_df['receptions'] = catch_
     result_df['yards'] = yardage_
 
-    adot_yardage = "Median Yards: " + str(result_df['yards'].median())
+    adot_yardage = "Median Yards: " + str(round(result_df['yards'].median(),1))
 
 
 
