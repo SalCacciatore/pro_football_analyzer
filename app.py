@@ -116,7 +116,7 @@ def game_sim(team_attempts, target_share, df, player):
     for bucket in df['air_yards_bucket'].unique()
 }
 
-    for snap in range(0,team_attempts):
+    for snap in range(0,int(team_attempts)):
         open = random.random()
         if open > target_share:
             pass
