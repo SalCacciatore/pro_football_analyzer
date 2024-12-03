@@ -11,6 +11,7 @@ import streamlit as st
 import pandas as pd
 import pickle
 from typing import Tuple, List
+import random
 
 # Caching models
 #@st.cache_resource
@@ -50,8 +51,85 @@ def predict_columns(data, yardage_model, touchdown_model):
     
     return pd.DataFrame(predictions)
 
-# Main processing function
-#@st.cache_data
+def bucket_air_yards(df):
+    """
+    Buckets the air_yards column into predefined ranges.
+
+    Parameters:
+    - df (pd.DataFrame): Input DataFrame with an 'air_yards' column.
+
+    Returns:
+    - pd.DataFrame: DataFrame with a new 'air_yards_bucket' column.
+    """
+    bins = [-float('inf'), 5, 11, 16, 21, float('inf')]
+    labels = ['<5 yards', '5-10 yards', '11-15 yards', '16-20 yards', '21+ yards']
+    
+    df['air_yards_bucket'] = pd.cut(df['air_yards'], 
+                                    bins=bins, 
+                                    labels=labels, 
+                                    right=False)  # Use right=False to make the intervals left-inclusive
+    return df
+
+
+
+def simulate_air_yards_bucket(frequency):
+    return np.random.choice(frequency.index, p=frequency.values)
+
+
+def completion_counter(air_yards_bucket,mean_completion_dict):
+    cp = mean_completion_dict[air_yards_bucket]
+    rng = random.random()
+    if rng<= cp:
+        return 1
+    else:
+        return 0
+
+def target_simulator(df, player,bucket_mean_gain,mean_completion_dict):
+    frequency = df[df['receiver_player_name']==player]['air_yards_bucket'].value_counts()
+    #print(frequency)
+    frequency = frequency / frequency.sum()
+    bucket = simulate_air_yards_bucket(frequency)
+    
+    catch = completion_counter(bucket,mean_completion_dict)
+
+    if catch == 1:
+        yards = bucket_mean_gain[bucket]
+    else:
+        yards = 0 
+        
+
+
+    return catch, yards
+
+
+def game_sim(team_attempts, target_share, df, player):
+    targets = 0
+    catches = 0
+    yards = 0
+    
+    bucket_mean_gain = {
+    bucket: df[(df['air_yards_bucket'] == bucket)&(df['complete_pass']==1)]['yards_gained'].mean()
+    for bucket in df['air_yards_bucket'].unique()}
+
+    bucket_mean_comp = {
+    bucket: df[df['air_yards_bucket'] == bucket]['complete_pass'].mean()
+    for bucket in df['air_yards_bucket'].unique()
+}
+
+    for snap in range(0,team_attempts):
+        open = random.random()
+        if open > target_share:
+            pass
+        else:
+            targets += 1
+            c, y = target_simulator(df, player,bucket_mean_gain,bucket_mean_comp)
+            catches += c
+            yards += y
+    return targets, catches, yards
+
+
+
+
 def process_data(data, yardage_model, touchdown_model):
     rec_data = data[data['air_yards'].notna() & data['receiver_player_name'].notna()]
     current_szn = rec_data[rec_data['season'] == 2024]
@@ -220,14 +298,6 @@ def wp_graph(dataframe, game_id):
 
     return fig
 
-
-
-# %%
-
-
-#szn_receivers.head(50)
-
-# %%
 
 def game_review(game_id):
 #game_id = '2023_02_MIN_PHI'
@@ -1738,7 +1808,30 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
 
 
-    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game, rec_target_share
+
+
+    yardage_ = []
+    catch_ = []
+    targets_ = []
+
+    for x in range(0,1000):
+    
+        t, c, y = game_sim(predicted_attempts, rec_target_share, df, receiver_name)
+        targets_.append(t)
+        yardage_.append(y)
+        catch_.append(c)
+
+    result_df = pd.DataFrame()
+
+    result_df['targets'] = targets_
+    result_df['receptions'] = catch_
+    result_df['yards'] = yardage_
+
+    adot_yardage = result_df['yards'].median()
+
+    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game, rec_target_share, adot_yardage
+
+
 
 
 
@@ -1901,7 +1994,7 @@ def main():
 
                     
             if st.button("Submit"):
-                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts, team_targets_in_period, szn_targets_per_game, t_share = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts,player_target_share)
+                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts, team_targets_in_period, szn_targets_per_game, t_share, adot_yardage = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts,player_target_share)
                 st.write(team_rec_df)
                 st.write(rec_df)
                 st.write(f"Predicted team targets: {team_attempts}")
@@ -1909,8 +2002,11 @@ def main():
                 st.write(f"Team targets per game this season {szn_targets_per_game}")
                 st.write(f"Target share: {t_share}")
                 st.write(receiver_string)
+                st.write("xYards-based Simulation")
                 st.write(median_yards)
                 st.write(results)
+                st.write("Air Yards-based simulation")
+                st.write(adot_yardage)
  
                 
 
