@@ -1905,6 +1905,7 @@ def simulate_receiver_game(
     return simulated_targets, simulated_yards
 
 def analyze_simulation_results(
+    threshold,
     predicted_attempts,
     targets: List[int],
     yards: List[float]
@@ -1919,7 +1920,15 @@ def analyze_simulation_results(
     Returns:
         Dictionary containing summary statistics
     """
+
+
+    result_df = pd.DataFrame()
+
+    result_df['yards'] = yards
+    perc = percentage_above_threshold(result_df, 'yards', threshold)
+
     return {
+        'Percentage above {threshold}': perc,
         'avg_targets': np.mean(targets),
         'median_targets': np.median(targets),
         'target_share': round(np.mean(targets)/predicted_attempts,3),
