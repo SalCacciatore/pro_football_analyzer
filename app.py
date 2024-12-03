@@ -106,7 +106,7 @@ def game_sim(team_attempts, target_share, df, player):
     targets = 0
     catches = 0
     yards = 0
-    
+    df = bucket_air_yards(df)
     bucket_mean_gain = {
     bucket: df[(df['air_yards_bucket'] == bucket)&(df['complete_pass']==1)]['yards_gained'].mean()
     for bucket in df['air_yards_bucket'].unique()}
