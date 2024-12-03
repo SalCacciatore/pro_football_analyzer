@@ -1757,7 +1757,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     rec_df = current_szn[(current_szn['receiver_player_name']==receiver_name)&(current_szn['posteam']==chosen_team)].groupby('week').agg({'pass':'sum','xYards':'sum','yards_gained':'sum'}).round(1)
 
-    receiver_string = (f"Season median: {rec_df['xYards'].median()}; Last four games median: {rec_df.tail(4)['xYards'].median()}")
+    receiver_string = (f"Season median: {round(rec_df['xYards'].median(),1)}; Last four games median: {round(rec_df.tail(4)['xYards'].median(),1)}")
 
     # get game by game data
     rec_data = data[(data['air_yards'].notna()) & (data['receiver_player_name'].notna())]
@@ -2040,10 +2040,10 @@ def main():
                 team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts, team_targets_in_period, szn_targets_per_game, t_share, adot_yardage, above_threshold = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts,player_target_share,over_under)
                 st.write(team_rec_df)
                 st.write(rec_df)
-                st.write(f"Predicted team targets: {team_attempts}")
-                st.write(f"Team targets per game in period {team_targets_in_period}")
-                st.write(f"Team targets per game this season {szn_targets_per_game}")
-                st.write(f"Target share: {t_share}")
+                st.write(f"Predicted team targets: {round(team_attempts,1)}")
+                st.write(f"Team targets per game in period {round(team_targets_in_period,1)}")
+                st.write(f"Team targets per game this season {round(szn_targets_per_game,1)}")
+                st.write(f"Target share: {round(t_share,3)}")
                 st.write(receiver_string)
                 st.write("**xYards-based Simulation**")
                 st.write(median_yards)
