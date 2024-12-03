@@ -1762,8 +1762,8 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     # get game by game data
     rec_data = data[(data['air_yards'].notna()) & (data['receiver_player_name'].notna())]
     current_szn_1 = rec_data[rec_data['season'] == 2024]
-    current_szn1 = current_szn1[current_szn1['receiver_player_name']!=excluded_receiver1]
-    current_szn1 = current_szn1[current_szn1['receiver_player_name']!=excluded_receiver2]
+    current_szn_1 = current_szn_1[current_szn_1['receiver_player_name']!=excluded_receiver1]
+    current_szn_1 = current_szn_1[current_szn_1['receiver_player_name']!=excluded_receiver2]
 
   
     
