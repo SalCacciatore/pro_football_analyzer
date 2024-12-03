@@ -1827,7 +1827,8 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     result_df['receptions'] = catch_
     result_df['yards'] = yardage_
 
-    adot_yardage = result_df['yards'].median()
+    adot_yardage = f"Median Yardage: {result_df['yards'].median()}
+
 
     return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game, rec_target_share, adot_yardage
 
