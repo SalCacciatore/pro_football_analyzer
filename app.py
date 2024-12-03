@@ -853,8 +853,7 @@ def game_review(game_id):
     rush_show = game[game['rush']==1].groupby('posteam').agg({'rush':'sum','epa':['mean','sum'],'success':'mean','yards_gained':['mean','sum','max'],'turnover':'sum','20+_play':'sum'}).round(2)
 
 # %%
-    rushers = game[game['rush']==1].groupby('rusher_player_name').agg({'posteam':'max','rush':'sum','epa':'sum','success':'mean','yards_gained':'sum','turnover':'sum','touchdown':'sum','goal_to_go':'sum','20+_play':'sum'}).round(2).sort_values(['posteam','rush'],ascending=False)
-
+    rushers = qb_show.copy()
 # %%
     game_receivers = game_by_game_receivers.reset_index()
     game_receivers['aDOT'] = round(game_receivers['air_yards']/game_receivers['targets'],1)
