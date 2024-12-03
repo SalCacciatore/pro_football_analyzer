@@ -164,7 +164,7 @@ def preprocess_data(data):
         ),
         'end_zone_target': (data['yardline_100'] - data['air_yards']) <= 0,
         'distance_to_EZ_after_target': data['yardline_100'] - data['air_yards'],
-        'goal_to_go': (data['yardline_100'] < 10).astype(int)
+        'goal_to_go': (data['yardline_100'] < 10)#.astype(int)
     })
 
     # Concatenate the new columns to the original DataFrame
@@ -239,7 +239,7 @@ def game_review(game_id):
     data = preprocess_data(data_all)
     
     game_by_game_receivers = process_data(data, yardage_model, touchdown_model)
-    szn_receivers = aggregate_season_receivers(game_by_game_receivers)
+    #szn_receivers = aggregate_season_receivers(game_by_game_receivers)
 
 
 
