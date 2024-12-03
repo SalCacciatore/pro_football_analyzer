@@ -163,8 +163,8 @@ def preprocess_data(data):
             data['yards_gained'] * 0.1     # 0.1 points per yard gained
         ),
         'end_zone_target': (data['yardline_100'] - data['air_yards']) <= 0,
-        'distance_to_EZ_after_target': data['yardline_100'] - data['air_yards'],
-        'goal_to_go': (data['yardline_100'] < 10).astype(int)
+        'distance_to_EZ_after_target': data['yardline_100'] - data['air_yards']
+        #'goal_to_go': (data['yardline_100'] < 10).astype(int)
     })
 
     # Concatenate the new columns to the original DataFrame
@@ -246,7 +246,6 @@ def game_review(game_id):
 
     game = data[data['game_id']==game_id]
 
-    flu = game[['goal_to_go']].head(50)
 # %%
     host = game['home_team'].max()
     visitor = game['away_team'].max()
@@ -876,7 +875,7 @@ def game_review(game_id):
 #
 
 
-    return st.write(game_db1), st.write(win_prob), st.plotly_chart(points_fig), st.plotly_chart(fig2), st.plotly_chart(fig3), st.write(pass_show), st.plotly_chart(fig5), st.plotly_chart(home_pass), st.plotly_chart(away_pass), st.write(length_show),st.write(qb_show), st.write(rush_show), st.plotly_chart(host_rush), st.plotly_chart(visitor_rush), st.write(receiver_show), st.write(flu), st.write(misc_show)
+    return st.write(game_db1), st.write(win_prob), st.plotly_chart(points_fig), st.plotly_chart(fig2), st.plotly_chart(fig3), st.write(pass_show), st.plotly_chart(fig5), st.plotly_chart(home_pass), st.plotly_chart(away_pass), st.write(length_show),st.write(qb_show), st.write(rush_show), st.plotly_chart(host_rush), st.plotly_chart(visitor_rush), st.write(receiver_show), st.write(rushers), st.write(misc_show)
 # %%
 header = st.container()
 
