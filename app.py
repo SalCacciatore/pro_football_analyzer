@@ -128,6 +128,25 @@ def game_sim(team_attempts, target_share, df, player):
     return targets, catches, yards
 
 
+def percentage_above_threshold(df, column, threshold):
+    """
+    Calculates the percentage of values in a DataFrame column above a given threshold.
+    
+    Parameters:
+    - df (pd.DataFrame): The input DataFrame.
+    - column (str): The column to analyze.
+    - threshold (float): The value to compare against.
+    
+    Returns:
+    - float: The percentage of values above the threshold.
+    """
+    total_values = len(df[column])
+    values_above_threshold = (df[column] > threshold).sum()
+    percentage = (values_above_threshold / total_values) * 100
+    return percentage
+
+
+
 
 
 def process_data(data, yardage_model, touchdown_model):
@@ -1830,8 +1849,12 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     adot_yardage = "Median Yards: " + str(round(result_df['yards'].median(),1))
 
 
+    threshold = 46.5
+    result = percentage_above_threshold(result_df, 'yards', threshold)
+    adot_perc_above = (f"Percentage of values above {threshold}: {result:.2f}%")
 
-    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game, rec_target_share, adot_yardage
+
+    return team_rec_df, rec_df, receiver_string, median_yards, results, predicted_attempts, period_targets_per_game, szn_targets_per_game, rec_target_share, adot_yardage, adot_perc_above
 
 
 
@@ -1996,7 +2019,7 @@ def main():
 
                     
             if st.button("Submit"):
-                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts, team_targets_in_period, szn_targets_per_game, t_share, adot_yardage = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts,player_target_share)
+                team_rec_df, rec_df, receiver_string, median_yards, results, team_attempts, team_targets_in_period, szn_targets_per_game, t_share, adot_yardage, above_threshold = receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_receiver2, receiver_name,starting_week,team_attempts,player_target_share)
                 st.write(team_rec_df)
                 st.write(rec_df)
                 st.write(f"Predicted team targets: {team_attempts}")
@@ -2009,6 +2032,7 @@ def main():
                 st.write(results)
                 st.write("Air Yards-based simulation")
                 st.write(adot_yardage)
+                st.write(above_threshold)
  
                 
 
