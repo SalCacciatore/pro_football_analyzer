@@ -1747,6 +1747,10 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     team_period['yards_game'] = team_period['yards_gained']/team_period['game_id']
 
+    team_period = team_period[team_period.index!=excluded_receiver1]
+
+    team_period = team_period[team_period.index!=excluded_receiver2]
+
     team_rec_df = team_period.round(2).sort_values('xYards_game',ascending=False)[['game_id','pass','target_share','xYards','xYards_game','yards_game']]
 
 
@@ -1756,7 +1760,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     receiver_string = (f"Season median: {rec_df['xYards'].median()}; Last four games median: {rec_df.tail(4)['xYards'].median()}")
 
     # get game by game data
-    rec_data = data[data['air_yards'].notna() & data['receiver_player_name'].notna()]
+    rec_data = data[(data['air_yards'].notna()) & (data['receiver_player_name'].notna())]
     current_szn_1 = rec_data[rec_data['season'] == 2024]
     
     
@@ -1787,7 +1791,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
     game_by_game_receivers['target_share'] = round(game_by_game_receivers['targets'] / game_by_game_receivers['team_attempts'], 3)
 
     individual_df = game_by_game_receivers.reset_index()
-    individual_df = individual_df[individual_df['receiver_player_name']==receiver_name]
+    individual_df = individual_df[(individual_df['receiver_player_name']==receiver_name)&(individual_df['posteam']==chosen_team)]
 
     rec_df = rec_df.merge(individual_df,on='week')[['week','game_id','targets','xYards','yards_gained_x','target_share','team_attempts']].set_index('week').rename(columns={'yards_gained_x':'yards_gained'})
 
@@ -1928,7 +1932,7 @@ def analyze_simulation_results(
     perc = percentage_above_threshold(result_df, 'yards', threshold)
 
 
-    return f"* Percentage of simulations above {threshold}: {round(perc,1)}", f"* Median_yards: {np.median(yards)}%"
+    return f"* Percentage of simulations above {threshold}: {round(perc,1)}%", f"* Median_yards: {np.median(yards)}"
 
 
 
