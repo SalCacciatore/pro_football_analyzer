@@ -1010,7 +1010,7 @@ def overall_creator(data, szn, offense, defense):
         'ARI': 'red',
         'ATL': 'black',
         'BAL': 'purple',
-        'BUF': 'red',
+        'BUF': 'blue',
         'CAR': 'black',
         'CHI': 'blue',
         'CIN': 'black',
@@ -1051,7 +1051,7 @@ def overall_creator(data, szn, offense, defense):
     )
 
 # Set the chart title
-    if szn == 2023:
+    if szn == 2025:
         fig.update_layout(title=f"{offense} Offense vs. {defense} Defense")
     else:
         fig.update_layout(title=f"{offense} Offense vs. {defense} Defense ({szn} stats)")
@@ -1114,7 +1114,7 @@ def pass_matchup(data, szn, offense, defense):
         'ARI': 'red',
         'ATL': 'black',
         'BAL': 'purple',
-        'BUF': 'red',
+        'BUF': 'blue',
         'CAR': 'black',
         'CHI': 'blue',
         'CIN': 'black',
@@ -1213,7 +1213,7 @@ def rush_matchup(data, szn, offense, defense):
         'ARI': 'red',
         'ATL': 'black',
         'BAL': 'purple',
-        'BUF': 'red',
+        'BUF': 'blue',
         'CAR': 'black',
         'CHI': 'blue',
         'CIN': 'black',
