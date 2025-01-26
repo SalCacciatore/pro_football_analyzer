@@ -1642,7 +1642,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
 
     data_all = load_data()
-    data = data_all.loc[data_all.season_type=='REG']
+    #data = data_all.loc[data_all.season_type=='REG']
     data = data[data['season'] == 2024]
 
     starting_week = (data[data['posteam']==chosen_team]['week'].max() - trailing_games)+1
