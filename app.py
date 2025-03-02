@@ -1810,6 +1810,54 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     rec_df = rec_df.merge(individual_df,on='week')[['week','game_id','targets','xYards','yards_gained_x','target_share','team_attempts']].set_index('week').rename(columns={'yards_gained_x':'yards_gained'})
 
+    chart_df = rec_df.reset_index()
+
+
+    # Assuming chart_df is your DataFrame and threshold is your variable
+    # chart_df should have columns: 'week', 'yards_gained', 'xyards'
+
+    # Create a line chart using Plotly
+    fig = go.Figure()
+
+    # Add the line for 'yards_gained'
+    fig.add_trace(go.Scatter(
+        x=chart_df['week'], 
+        y=chart_df['yards_gained'], 
+        mode='lines+markers', 
+        name='Yards Gained', 
+        line=dict(color='blue'),
+        marker=dict(size=8, color='blue', symbol='circle')  # Circles at data points
+    ))
+    fig.add_trace(go.Scatter(
+        x=chart_df['week'], 
+        y=chart_df['xYards'], 
+        mode='lines+markers', 
+        name='xYards', 
+        line=dict(color='green'),
+        marker=dict(size=8, color='green', symbol='circle')  # Circles at data points
+    ))
+
+# Add the horizontal dotted red line for the threshold
+    fig.add_trace(go.Scatter(
+        x=chart_df['week'], 
+        y=[threshold] * len(chart_df), 
+        mode='lines', 
+        name='Threshold', 
+        line=dict(color='red', dash='dot')
+    ))
+
+# Update the layout
+    fig.update_layout(
+        title=f'{receiver_name}',
+        xaxis_title='Week',
+        yaxis_title='Yards',
+        template='plotly_dark'  # Optional, can be removed or changed
+    )
+
+    # Display the plot in the Streamlit app
+    st.plotly_chart(fig)
+
+
 
 
     individual_period = rec_df.copy()
@@ -1868,8 +1916,6 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     adot_yardage = "* Median Yards: " + str(round(result_df['yards'].median(),1))
 
-
-    #threshold = 46.5
     result = percentage_above_threshold(result_df, 'yards', threshold)
     adot_perc_above = (f"* Percentage of simulation above {threshold}: {result:.2f}%")
 
