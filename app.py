@@ -23,7 +23,7 @@ def load_models():
         touchdown_model = pickle.load(file)
 
 
-    with open('Receiving_Yards_Predictor/pass_volume_model.pkl', 'rb') as file:
+    with open('models/pass_volume_model.pkl', 'rb') as file:
         pass_volume_model = pickle.load(file)
 
     return yardage_model, touchdown_model, pass_volume_model
