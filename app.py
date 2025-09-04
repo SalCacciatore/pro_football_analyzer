@@ -1235,7 +1235,7 @@ def rush_matchup(data, szn, offense, defense):
         'NYG': 'blue',
         'NYJ': 'green',
         'LV': 'black',
-        'PHI': 'black',
+        'PHI': 'green',
         'PIT': 'black',
         'SEA': 'blue',
         'SF': 'red',
