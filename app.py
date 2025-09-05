@@ -226,7 +226,7 @@ def aggregate_season_receivers(game_by_game_receivers):
 #@st.cache_data
 def load_data():
     data_all = pd.DataFrame()
-    YEARS = [2023, 2024]
+    YEARS = [2024,2025]
 
     for i in YEARS:
         i_data = pd.read_csv('https://github.com/nflverse/nflverse-data/releases/download/pbp/' \
