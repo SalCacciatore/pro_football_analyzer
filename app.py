@@ -850,10 +850,13 @@ def game_review(game_id):
 
     turnover_df = game[game['turnover']==1].groupby('posteam')[['epa']].sum().rename(columns={'epa':'turnover_epa'})
 
+    pass_turnover_df = game[(game['turnover']==1)&(game['pass']==1)].groupby('posteam')[['epa']].sum().rename(columns={'epa':'turnover_epa'})
+
+
     team_scramble_df = game[(game['pass']==1) & (game['rusher_player_name'].isna()==False)].groupby('posteam').agg({'epa':'sum'}).rename(columns={'epa':'scramble_epa'})
 
 
-    passing_epa_df = throws_df.merge(team_scramble_df,right_index=True,left_index=True,how='outer').merge(sack_df,right_index=True,left_index=True, how='outer').merge(turnover_df,right_index=True,left_index=True, how='outer').fillna(0)
+    passing_epa_df = throws_df.merge(team_scramble_df,right_index=True,left_index=True,how='outer').merge(sack_df,right_index=True,left_index=True, how='outer').merge(pass_turnover_df,right_index=True,left_index=True, how='outer').fillna(0)
 
 
 
