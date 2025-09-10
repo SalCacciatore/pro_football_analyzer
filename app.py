@@ -13,6 +13,9 @@ import pickle
 from typing import Tuple, List
 import random
 
+
+this_season = 2025
+
 # Caching models
 #@st.cache_resource
 def load_models():
@@ -151,7 +154,7 @@ def percentage_above_threshold(df, column, threshold):
 
 def process_data(data, yardage_model, touchdown_model):
     rec_data = data[data['air_yards'].notna() & data['receiver_player_name'].notna()]
-    current_szn = rec_data[rec_data['season'] == 2024]
+    current_szn = rec_data[rec_data['season'] == 2025]
 
     # Get predictions and concatenate with current_szn
     new_columns_current = predict_columns(current_szn, yardage_model, touchdown_model)
@@ -1254,7 +1257,7 @@ def rush_matchup(data, szn, offense, defense):
     )
 
 # Set the chart title
-    if szn == 2024:
+    if szn == this_season:
         fig.update_layout(title=f"{offense} Rush Offense vs. {defense} Rush Defense")
     else:
         fig.update_layout(title=f"{offense} Rush Offense vs. {defense} Rush Defense ({szn} stats)")
@@ -1643,7 +1646,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     data_all = load_data()
     
-    data = data_all[data_all['season'] == 2024]
+    data = data_all[data_all['season'] == this_season]
 
     #data = data_all.loc[data_all.season_type=='REG']
 
@@ -1770,7 +1773,7 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     # get game by game data
     rec_data = data[(data['air_yards'].notna()) & (data['receiver_player_name'].notna())]
-    current_szn_1 = rec_data[rec_data['season'] == 2024]
+    current_szn_1 = rec_data[rec_data['season'] == this_season]
     current_szn_1 = current_szn_1[current_szn_1['receiver_player_name']!=excluded_receiver1]
     current_szn_1 = current_szn_1[current_szn_1['receiver_player_name']!=excluded_receiver2]
 
