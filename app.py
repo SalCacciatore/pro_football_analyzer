@@ -152,9 +152,9 @@ def percentage_above_threshold(df, column, threshold):
 
 
 
-def process_data(data, yardage_model, touchdown_model):
+def process_data(data, yardage_model, touchdown_model,szn):
     rec_data = data[data['air_yards'].notna() & data['receiver_player_name'].notna()]
-    current_szn = rec_data[rec_data['season'] == 2025]
+    current_szn = rec_data[rec_data['season'] == szn]
 
     # Get predictions and concatenate with current_szn
     new_columns_current = predict_columns(current_szn, yardage_model, touchdown_model)
@@ -1292,8 +1292,7 @@ with header:
     st.write("All data from NFLVerse.")
 
 
-def get_off_stats(team,data,last_or_this):
-
+def get_off_stats(team,data,last_or_this,szn):
 
 
 
@@ -1378,7 +1377,7 @@ def get_off_stats(team,data,last_or_this):
         yardage_model, touchdown_model = load_models()[0:2]
 
     
-        game_by_game_receivers = process_data(data, yardage_model, touchdown_model)
+        game_by_game_receivers = process_data(data, yardage_model, touchdown_model,szn)
         szn_receivers = aggregate_season_receivers(game_by_game_receivers)
 
         rec_data = szn_receivers.reset_index()
@@ -1485,14 +1484,14 @@ def get_team_stats(team, year):
 
 
 
-    off_df = get_off_stats(team, data,'this')[0]
+    off_df = get_off_stats(team, data,'this',year)[0]
     year1 = off_df.copy()
 
     off_df = off_df.rename(columns={'Stat':f'{year} {team} Offense'})
 
-    pass_df = get_off_stats(team,data,'this')[1]
-    rush_df = get_off_stats(team,data,'this')[2]
-    rec_df = get_off_stats(team,data,'this')[3]
+    pass_df = get_off_stats(team,data,'this',year)[1]
+    rush_df = get_off_stats(team,data,'this',year)[2]
+    rec_df = get_off_stats(team,data,'this',year)[3]
 
     def_df = get_def_stats(team,data)
     year1_def = def_df.copy()
@@ -1503,7 +1502,7 @@ def get_team_stats(team, year):
 
 
 
-    year2 = get_off_stats(team,last_year_stats,'last')[0]
+    year2 = get_off_stats(team,last_year_stats,'last',previous)[0]
     year2_def = get_def_stats(team,last_year_stats)
 
 
