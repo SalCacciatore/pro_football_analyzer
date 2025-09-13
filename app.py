@@ -55,7 +55,7 @@ def predict_columns(data, yardage_model, touchdown_model):
     predictions = {
         'xYards': yardage_model.predict(new_X),
         'xTDs': touchdown_model.predict_proba(new_X)[:,1],
-        'xFPs': (yardage_model.predict(new_X) * 0.1) + (touchdown_model.predict(new_X) * 6) + data['cp']
+        'xFPs': (yardage_model.predict(new_X) * 0.1) + (touchdown_model.predict_proba(new_X)[:,1] * 6) + data['cp']
     }
     
     return pd.DataFrame(predictions)
@@ -72,7 +72,7 @@ def expected_rushing_columns(data, yardage_model, touchdown_model):
     predictions = {
         'xYards': yardage_model.predict(new_X),
         'xTDs': touchdown_model.predict_proba(new_X)[:,1],
-        'xFPs': (yardage_model.predict(new_X) * 0.1) + (touchdown_model.predict(new_X) * 6)
+        'xFPs': (yardage_model.predict(new_X) * 0.1) + (touchdown_model.predict_proba(new_X)[:,1] * 6)
     }
     
     return pd.DataFrame(predictions)
@@ -1022,7 +1022,7 @@ def game_review(game_id):
     #rushers = game[game['rush']==1].groupby('rusher_player_name').agg({'posteam':'max','rush':'sum','epa':'sum','success':'mean','yards_gained':'sum','turnover':'sum','touchdown':'sum','goal_to_go':'sum','20+_play':'sum'}).round(2).sort_values(['posteam','rush'],ascending=False)
     game_rushers = game_by_game_rushers.reset_index()
     rushers = game_rushers[game_rushers['game_id']==game_id].sort_values(['posteam','xFPs'],ascending=False)[['rusher_player_name','posteam','epa','success','fantasy_points','xFPs','rush','designed_run_share','yards_gained','xYards','touchdown','xTDs','goal_to_go','fumble_lost']]
-    rushers[['xFPs', 'xYards', 'xTDs']] = rushers[['xFPs', 'xYards', 'xTDs']].round(1)
+    #rushers[['xFPs', 'xYards', 'xTDs']] = rushers[['xFPs', 'xYards', 'xTDs']].round(1)
     rushers['epa/run'] = rushers['epa']/rushers['rush']
     rushers['success_rate'] = rushers['success']/rushers['rush']
     rushers['yards/carry'] = rushers['yards_gained']/rushers['rush']
