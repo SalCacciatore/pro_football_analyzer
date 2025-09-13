@@ -1040,6 +1040,8 @@ def game_review(game_id):
     rushers['success_rate'] = rushers['success']/rushers['rush']
     rushers['yards/carry'] = rushers['yards_gained']/rushers['rush']
     rushers[['xFPs', 'xYards', 'xTDs','yards/carry']] = rushers[['xFPs', 'xYards', 'xTDs','yards/carry']].round(1)
+    rushers[['epa/run']] = rushers[['epa/run']].round(2)
+
     rushers = rushers[['rusher_player_name','posteam','rush','fantasy_points','xFPs','epa','designed_run_share','yards_gained','xYards','yards/carry','epa/run','success_rate','touchdown','xTDs','goal_to_go','fumble_lost']]
 
 
@@ -1048,6 +1050,7 @@ def game_review(game_id):
     game_receivers['aDOT'] = round(game_receivers['air_yards']/game_receivers['targets'],1)
     receiver_show = game_receivers[game_receivers['game_id']==game_id].sort_values(['posteam','xFPs'],ascending=False)[['receiver_player_name','posteam','fantasy_points','xFPs','WOPR','targets','target_share','complete_pass','cp', 'yards_gained','xYards', 'aDOT', 'touchdown','xTDs','end_zone_target','fumble_lost']]
     receiver_show[['xFPs', 'xYards', 'xTDs','cp']] = receiver_show[['xFPs', 'xYards', 'xTDs','cp']].round(1)
+
     #[['receiver_player_name','posteam','WOPR','target_share','targets','complete_pass','yards_gained','aDOT','touchdown','goal_to_go']].round(2)
 
     #fantasy = rushers.set_index(['rusher_player_name']).merge(receiver_show.set_index(['receiver_player_name']),right_index=True,left_index=True,how='outer')
