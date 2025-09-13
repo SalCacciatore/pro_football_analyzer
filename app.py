@@ -19,7 +19,7 @@ this_season = 2025
 # Caching models
 #@st.cache_resource
 def load_models():
-    with open('Models/yardage_model.pkl', 'rb') as file:
+    with open('Models/rec_yardage_model.pkl', 'rb') as file:
         yardage_model = pickle.load(file)
     
     with open('Models/touchdown_model.pkl', 'rb') as file:
