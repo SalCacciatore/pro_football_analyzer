@@ -1040,7 +1040,7 @@ def game_review(game_id):
     rushers['success_rate'] = rushers['success']/rushers['rush']
     rushers['yards/carry'] = rushers['yards_gained']/rushers['rush']
     rushers[['xFPs', 'xYards', 'xTDs','yards/carry']] = rushers[['xFPs', 'xYards', 'xTDs','yards/carry']].round(1)
-    rushers[['epa/run']] = rushers[['epa/run']].round(2)
+    rushers[['epa/run','epa']] = rushers[['epa/run','epa']].round(2)
 
     rushers = rushers[['rusher_player_name','posteam','rush','fantasy_points','xFPs','epa','designed_run_share','yards_gained','xYards','yards/carry','epa/run','success_rate','touchdown','xTDs','goal_to_go','fumble_lost']]
 
