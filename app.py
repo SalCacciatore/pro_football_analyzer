@@ -54,7 +54,7 @@ def predict_columns(data, yardage_model, touchdown_model):
     # Perform predictions
     predictions = {
         'xYards': yardage_model.predict(new_X),
-        'xTDs': touchdown_model.predict(new_X),
+        'xTDs': touchdown_model.predict_proba(new_X)[:,1],
         'xFPs': (yardage_model.predict(new_X) * 0.1) + (touchdown_model.predict(new_X) * 6) + data['cp']
     }
     
@@ -71,7 +71,7 @@ def expected_rushing_columns(data, yardage_model, touchdown_model):
     # Perform predictions
     predictions = {
         'xYards': yardage_model.predict(new_X),
-        'xTDs': touchdown_model.predict(new_X),
+        'xTDs': touchdown_model.predict_proba(new_X)[:,1],
         'xFPs': (yardage_model.predict(new_X) * 0.1) + (touchdown_model.predict(new_X) * 6)
     }
     
