@@ -242,7 +242,7 @@ def process_rush_data(data, yardage_model, touchdown_model,szn):
 
             carries = offense['rush'].sum()
 
-            rushers = offense.groupby(['rusher_player_name', 'posteam', 'game_id', 'week'])[['rush', 'fantasy_points', 'xFPs','yards_gained', 'xYards', 'touchdown', 'xTDs', 'inside_10','fumble_lost']].sum()
+            rushers = offense.groupby(['rusher_player_name', 'posteam', 'game_id', 'week'])[['rush', 'fantasy_points', 'xFPs','yards_gained', 'xYards', 'touchdown', 'xTDs', 'goal_to_go','fumble_lost']].sum()
             rushers['team_attempts'] = carries
             
             rushers_list.append(rushers)
@@ -1021,12 +1021,12 @@ def game_review(game_id):
 # %%
     #rushers = game[game['rush']==1].groupby('rusher_player_name').agg({'posteam':'max','rush':'sum','epa':'sum','success':'mean','yards_gained':'sum','turnover':'sum','touchdown':'sum','goal_to_go':'sum','20+_play':'sum'}).round(2).sort_values(['posteam','rush'],ascending=False)
     game_rushers = game_by_game_rushers.reset_index()
-    rushers = game_rushers[game_rushers['game_id']==game_id].sort_values(['posteam','xFPs'],ascending=False)[['rusher_player_name','posteam','epa','success','fantasy_points','xFPs','rush','designed_run_share','yards_gained','xYards','touchdown','xTDs','inside_10','fumble_lost']]
+    rushers = game_rushers[game_rushers['game_id']==game_id].sort_values(['posteam','xFPs'],ascending=False)[['rusher_player_name','posteam','epa','success','fantasy_points','xFPs','rush','designed_run_share','yards_gained','xYards','touchdown','xTDs','goal_to_go','fumble_lost']]
     rushers[['xFPs', 'xYards', 'xTDs']] = rushers[['xFPs', 'xYards', 'xTDs']].round(1)
     rushers['epa/run'] = rushers['epa']/rushers['rush']
     rushers['success_rate'] = rushers['success']/rushers['rush']
     rushers['yards/carry'] = rushers['yards_gained']/rushers['rush']
-    rushers = rushers[['rusher_player_name','posteam','epa','epa/run','yards/carry','success_rate','fantasy_points','xFPs','rush','designed_run_share','yards_gained','xYards','touchdown','xTDs','inside_10','fumble_lost']]
+    rushers = rushers[['rusher_player_name','posteam','epa','epa/run','yards/carry','success_rate','fantasy_points','xFPs','rush','designed_run_share','yards_gained','xYards','touchdown','xTDs','goal_to_go','fumble_lost']]
 
 
 # %%
