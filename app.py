@@ -223,7 +223,7 @@ def process_rush_data(data, yardage_model, touchdown_model,szn):
     current_szn = rec_data[rec_data['season'] == szn]
 
     # Get predictions and concatenate with current_szn
-    new_columns_current = predict_columns(current_szn, yardage_model, touchdown_model)
+    new_columns_current = expected_rushing_columns(current_szn, yardage_model, touchdown_model)
     current_szn = pd.concat([current_szn, new_columns_current], axis=1)
 
     # Prepare game by game receivers data
