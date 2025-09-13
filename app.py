@@ -45,7 +45,7 @@ def load_models():
 def predict_columns(data, yardage_model, touchdown_model):
     new_predictors = [
         'air_yards', 'yardline_100', 'ydstogo',
-        'down', 'pass_location', 'season', 'qb_hit', 'end_zone_target', 'distance_to_EZ_after_target'
+        'down', 'pass_location', 'qb_hit', 'end_zone_target', 'distance_to_EZ_after_target'
     ]
     
     new_X = data[new_predictors]
