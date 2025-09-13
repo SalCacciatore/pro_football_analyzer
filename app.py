@@ -19,17 +19,23 @@ this_season = 2025
 # Caching models
 #@st.cache_resource
 def load_models():
-    with open('yardage_model.pkl', 'rb') as file:
+    with open('Models/yardage_model.pkl', 'rb') as file:
         yardage_model = pickle.load(file)
     
-    with open('touchdown_model.pkl', 'rb') as file:
+    with open('Models/touchdown_model.pkl', 'rb') as file:
         touchdown_model = pickle.load(file)
 
+    with open('Models/rushing_touchdown_model.pkl', 'rb') as file:
+        rush_touchdown_model = pickle.load(file)
+
+    with open('Models/rush_yardage_model.pkl', 'rb') as file:
+        rush_yards_model = pickle.load(file)
+      
 
     with open('Models/pass_volume_model.pkl', 'rb') as file:
         pass_volume_model = pickle.load(file)
 
-    return yardage_model, touchdown_model, pass_volume_model
+    return yardage_model, touchdown_model, pass_volume_model, rush_yards_model, rush_touchdown_model
 
 
 
@@ -53,6 +59,24 @@ def predict_columns(data, yardage_model, touchdown_model):
     }
     
     return pd.DataFrame(predictions)
+
+def expected_rushing_columns(data, yardage_model, touchdown_model):
+    new_predictors = [
+    'yardline_100', 'ydstogo',
+    'down','run_location']
+    
+    new_X = data[new_predictors]
+    new_X = pd.get_dummies(new_X, columns=['run_location'], drop_first=True)
+    
+    # Perform predictions
+    predictions = {
+        'xYards': yardage_model.predict(new_X),
+        'xTDs': touchdown_model.predict(new_X),
+        'xFPs': (yardage_model.predict(new_X) * 0.1) + (touchdown_model.predict(new_X) * 6)
+    }
+    
+    return pd.DataFrame(predictions)
+
 
 def bucket_air_yards(df):
     """
@@ -160,13 +184,6 @@ def process_data(data, yardage_model, touchdown_model,szn):
     new_columns_current = predict_columns(current_szn, yardage_model, touchdown_model)
     current_szn = pd.concat([current_szn, new_columns_current], axis=1)
 
-    # Calculate fantasy points
-    data['fantasy_points'] = (
-        data['complete_pass'] * 1 +          # 1 point per completion
-        data['touchdown'] * 6 +               # 6 points per touchdown
-        data['yards_gained'] * 0.1            # 0.1 points per yard gained
-    )
-
     # Prepare game by game receivers data
     games = current_szn['game_id'].unique()
     receivers_list = []
@@ -199,6 +216,44 @@ def process_data(data, yardage_model, touchdown_model,szn):
     game_by_game_receivers['WOPR'] = round(1.5 * game_by_game_receivers['target_share'] + 0.7 * game_by_game_receivers['air_yards_share'], 3)
 
     return game_by_game_receivers
+
+
+def process_rush_data(data, yardage_model, touchdown_model,szn):
+    rec_data = data[data['rush']==1]
+    current_szn = rec_data[rec_data['season'] == szn]
+
+    # Get predictions and concatenate with current_szn
+    new_columns_current = predict_columns(current_szn, yardage_model, touchdown_model)
+    current_szn = pd.concat([current_szn, new_columns_current], axis=1)
+
+    # Prepare game by game receivers data
+    games = current_szn['game_id'].unique()
+    rushers_list = []
+
+    for game in games:
+        current_game = current_szn[current_szn['game_id'] == game]
+        teams = current_game['posteam'].unique()
+
+        for team in teams:
+            offense = current_game[(current_game['posteam'] == team) & (current_game['rush'] == 1)]
+            
+            if offense.empty:
+                continue  # Skip if there's no offense data
+
+            carries = offense['rush'].sum()
+
+            rushers = offense.groupby(['rusher_player_name', 'posteam', 'game_id', 'week'])[['rush', 'fantasy_points', 'xFPs','yards_gained', 'xYards', 'touchdown', 'xTDs', 'inside_10','fumble_lost']].sum()
+            rushers['team_attempts'] = carries
+            
+            rushers_list.append(rushers)
+
+    # Concatenate all receivers data at once
+    game_by_game_rushers = pd.concat(rushers_list)
+
+    # Calculate shares and WOPR
+    game_by_game_rushers['designed_run_share'] = round(game_by_game_rushers['rush'] / game_by_game_rushers['team_attempts'], 3)
+
+    return game_by_game_rushers
 
 # Aggregating season receivers
 #@st.cache_data
@@ -326,6 +381,7 @@ def game_review(game_id):
 
     yardage_model, touchdown_model = load_models()[:2]
 
+    rush_yardage_model, rush_touchdown_model = load_models()[3:5]
     # Load and preprocess data
     data_all = load_data()
     data = preprocess_data(data_all)
@@ -335,6 +391,7 @@ def game_review(game_id):
     
     game_by_game_receivers = process_data(data, yardage_model, touchdown_model,year_int)
     #szn_receivers = aggregate_season_receivers(game_by_game_receivers)
+    game_by_game_rushers = process_rush_data (data, rush_yardage_model, rush_touchdown_model,year_int)
 
 
 
@@ -963,8 +1020,15 @@ def game_review(game_id):
     rush_show = game[game['rush']==1].groupby('posteam').agg({'rush':'sum','epa':['mean','sum'],'success':'mean','yards_gained':['mean','sum','max'],'turnover':'sum','20+_play':'sum'}).round(2)
 
 # %%
-    rushers = game[game['rush']==1].groupby('rusher_player_name').agg({'posteam':'max','rush':'sum','epa':'sum','success':'mean','yards_gained':'sum','turnover':'sum','touchdown':'sum','goal_to_go':'sum','20+_play':'sum'}).round(2).sort_values(['posteam','rush'],ascending=False)
-    
+    #rushers = game[game['rush']==1].groupby('rusher_player_name').agg({'posteam':'max','rush':'sum','epa':'sum','success':'mean','yards_gained':'sum','turnover':'sum','touchdown':'sum','goal_to_go':'sum','20+_play':'sum'}).round(2).sort_values(['posteam','rush'],ascending=False)
+    game_rushers = game_by_game_rushers.reset_index()
+    rushers = game_rushers[game_rushers['game_id']==game_id].sort_values(['posteam','xFPs'],ascending=False)[['rusher_player_name','posteam','epa','success','fantasy_points','xFPs','rush','designed_run_share','yards_gained','xYards','touchdown','xTDs','inside_10','fumble_lost']]
+    rushers[['xFPs', 'xYards', 'xTDs']] = rushers[['xFPs', 'xYards', 'xTDs']].round(1)
+    rushers['epa/run'] = rushers['epa']/rushers['rush']
+    rushers['success_rate'] = rushers['success']/rushers['rush']
+    rushers['yards/carry'] = rushers['yards_gained']/rushers['rush']
+    rushers = rushers[['rusher_player_name','posteam','epa','epa/run','yards/carry','success_rate','fantasy_points','xFPs','rush','designed_run_share','yards_gained','xYards','touchdown','xTDs','inside_10','fumble_lost']]
+
 
 # %%
     game_receivers = game_by_game_receivers.reset_index()
