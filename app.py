@@ -331,7 +331,7 @@ def game_review(game_id):
     data = preprocess_data(data_all)
     
     year_ = game_id.split[_][0]
-    year_ = int(year_)_
+    year_ = int(year_)
 
     game_by_game_receivers = process_data(data, yardage_model, touchdown_model,year_)
     #szn_receivers = aggregate_season_receivers(game_by_game_receivers)
