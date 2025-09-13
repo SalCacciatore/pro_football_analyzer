@@ -242,7 +242,7 @@ def process_rush_data(data, yardage_model, touchdown_model,szn):
 
             carries = offense['rush'].sum()
 
-            rushers = offense.groupby(['rusher_player_name', 'posteam', 'game_id', 'week'])[['rush', 'fantasy_points', 'xFPs','yards_gained', 'xYards', 'touchdown', 'xTDs', 'goal_to_go','fumble_lost']].sum()
+            rushers = offense.groupby(['rusher_player_name', 'posteam', 'game_id', 'week'])[['rush', 'fantasy_points', 'xFPs','yards_gained', 'xYards', 'touchdown', 'xTDs', 'goal_to_go','fumble_lost','epa','success']].sum()
             rushers['team_attempts'] = carries
             
             rushers_list.append(rushers)
