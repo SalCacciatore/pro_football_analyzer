@@ -1037,7 +1037,7 @@ def game_review(game_id):
     game_rushers = game_by_game_rushers.reset_index()
     rushers = game_rushers[game_rushers['game_id']==game_id].sort_values(['posteam','xFPs'],ascending=False)[['rusher_player_name','posteam','epa','success','fantasy_points','xFPs','rush','designed_run_share','yards_gained','xYards','touchdown','xTDs','goal_to_go','fumble_lost']]
     rushers['epa/run'] = rushers['epa']/rushers['rush']
-    rushers['success_rate'] = rushers['success']/rushers['rush']
+    rushers['success_rate'] = round(rushers['success']/rushers['rush'],2)
     rushers['yards/carry'] = rushers['yards_gained']/rushers['rush']
     rushers[['xFPs', 'xYards', 'xTDs','yards/carry']] = rushers[['xFPs', 'xYards', 'xTDs','yards/carry']].round(1)
     rushers[['epa/run','epa']] = rushers[['epa/run','epa']].round(2)
