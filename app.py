@@ -379,9 +379,8 @@ def wp_graph(dataframe, game_id):
 def game_review(game_id):
 #game_id = '2023_02_MIN_PHI'
 
-    yardage_model, touchdown_model = load_models()[:2]
+    yardage_model, touchdown_model, not_needed_model, rush_yardage_model, rush_touchdown_model = load_models()
 
-    rush_yardage_model, rush_touchdown_model = load_models()[3:5]
     # Load and preprocess data
     data_all = load_data()
     data = preprocess_data(data_all)
