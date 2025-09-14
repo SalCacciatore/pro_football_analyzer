@@ -280,7 +280,17 @@ def aggregate_season_receivers(game_by_game_receivers):
 
 
 
+def aggregate_season_rushers(game_by_game_rushers):
+    szn_rushers = game_by_game_rushers.reset_index().groupby(['rusher_player_name', 'posteam'])[['rush','epa','success', 'fantasy_points', 'xFPs', 'yards_gained', 'xYards', 'touchdown', 'xTDs', 'goal_to_go', 'fumble_lost', 'team_attempts']].sum()
+    
+    szn_rushers['designed_run_share'] = round(szn_rushers['rush'] / szn_rushers['team_attempts'], 3)
+    szn_rushers['epa/run'] = round(szn_rushers['epa']/szn_rushers['rush'],2)
+    szn_rushers['success_rate'] = round(szn_rushers['success'] / szn_rushers['rush'], 3)
+    
+    # Round columns
+    szn_rushers[['xFPs', 'xYards', 'xTDs']] = szn_rushers[['xFPs', 'xYards', 'xTDs']].round(1)
 
+    return szn_rushers.sort_values('xFPs', ascending=False).reset_index()
 
 
 
@@ -1461,6 +1471,8 @@ def get_off_stats(team,data,last_or_this,szn):
         models = load_models()
         yardage_model = models["rec_yardage"]
         touchdown_model = models["rec_touchdown"]
+        rush_yard_model = models['rush_yardage']
+        rush_td_model = models['rush_touchdown']
     
         game_by_game_receivers = process_data(data, yardage_model, touchdown_model,szn)
         szn_receivers = aggregate_season_receivers(game_by_game_receivers)
@@ -1468,6 +1480,13 @@ def get_off_stats(team,data,last_or_this,szn):
         rec_data = szn_receivers.reset_index()
     
         team_receiving = rec_data[rec_data['posteam']==team]
+
+        game_by_game_rushers = process_rush_data(data, rush_yard_model, rush_td_model,szn)
+        szn_rushers = aggregate_season_rushers(game_by_game_rushers)
+
+        rush_data = szn_rushers.reset_index()
+        team_rushing = rush_data[rush_data['posteam']==team]
+
         return df, team_passing, team_rushing, team_receiving
     if last_or_this == 'last':
         return df, team_passing, team_rushing
