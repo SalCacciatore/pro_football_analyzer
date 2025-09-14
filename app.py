@@ -210,7 +210,7 @@ def process_data(data, yardage_model, touchdown_model,szn):
             throws = offense[['complete_pass', 'incomplete_pass', 'interception']].sum().sum()
             team_air_yards = offense['air_yards'].sum()
 
-            receivers = offense.groupby(['receiver_player_name', 'posteam', 'game_id', 'week'])[['pass', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'touchdown', 'xTDs', 'end_zone_target','fumble_lost']].sum()
+            receivers = offense.groupby(['receiver_player_name', 'posteam', 'game_id', 'week'])[['pass', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'touchdown', 'xTDs', 'end_zone_target','fumble_lost','yards_after_catch','xyac_mean_yardage']].sum()
             receivers['team_attempts'] = throws
             receivers['team_air_yards'] = team_air_yards
             
@@ -251,7 +251,7 @@ def process_rush_data(data, yardage_model, touchdown_model,szn):
 
             carries = offense['rush'].sum()
 
-            rushers = offense.groupby(['rusher_player_name', 'posteam', 'game_id', 'week'])[['rush', 'fantasy_points', 'xFPs','yards_gained', 'xYards', 'touchdown', 'xTDs', 'goal_to_go','fumble_lost','epa','success']].sum()
+            rushers = offense.groupby(['rusher_player_name', 'posteam', 'game_id', 'week'])[['rush', 'fantasy_points', 'xFPs','yards_gained', 'xYards', 'touchdown', 'xTDs', 'goal_to_go','fumble_lost','epa','success','20+_play']].sum()
             rushers['team_attempts'] = carries
             
             rushers_list.append(rushers)
@@ -266,7 +266,7 @@ def process_rush_data(data, yardage_model, touchdown_model,szn):
 # Aggregating season receivers
 #@st.cache_data
 def aggregate_season_receivers(game_by_game_receivers):
-    szn_receivers = game_by_game_receivers.reset_index().groupby(['receiver_player_name', 'posteam'])[['targets', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'touchdown', 'xTDs', 'end_zone_target', 'fumble_lost', 'team_attempts', 'team_air_yards']].sum()
+    szn_receivers = game_by_game_receivers.reset_index().groupby(['receiver_player_name', 'posteam'])[['targets', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'touchdown', 'xTDs', 'end_zone_target', 'fumble_lost', 'team_attempts', 'team_air_yards','yards_after_catch','xyac_mean_yardage']].sum()
     
     szn_receivers['target_share'] = round(szn_receivers['targets'] / szn_receivers['team_attempts'], 3)
     szn_receivers['air_yards_share'] = round(szn_receivers['air_yards'] / szn_receivers['team_air_yards'], 3)
@@ -281,7 +281,7 @@ def aggregate_season_receivers(game_by_game_receivers):
 
 
 def aggregate_season_rushers(game_by_game_rushers):
-    szn_rushers = game_by_game_rushers.reset_index().groupby(['rusher_player_name', 'posteam'])[['rush','epa','success', 'fantasy_points', 'xFPs', 'yards_gained', 'xYards', 'touchdown', 'xTDs', 'goal_to_go', 'fumble_lost', 'team_attempts']].sum()
+    szn_rushers = game_by_game_rushers.reset_index().groupby(['rusher_player_name', 'posteam'])[['rush','epa','success', 'fantasy_points', 'xFPs', 'yards_gained', 'xYards', 'touchdown', 'xTDs', 'goal_to_go', 'fumble_lost', 'team_attempts','20+_play']].sum()
     
     szn_rushers['designed_run_share'] = round(szn_rushers['rush'] / szn_rushers['team_attempts'], 3)
     szn_rushers['epa/run'] = round(szn_rushers['epa']/szn_rushers['rush'],2)
@@ -1465,7 +1465,7 @@ def get_off_stats(team,data,last_or_this,szn):
 
 
     team_passing = team_data.groupby('passer_player_name').agg({'pass':'sum','epa':['sum','mean'],'success':'mean','air_yards':'mean', 'cpoe':'mean','touchdown':['sum','mean'],'interception':['sum','mean']})
-    team_rushing = team_data.groupby('rusher_player_name').agg({'rush':'sum','epa':['sum','mean'],'success':'mean','yards_gained':['sum','mean']})
+    #team_rushing = team_data.groupby('rusher_player_name').agg({'rush':'sum','epa':['sum','mean'],'success':'mean','yards_gained':['sum','mean']})
     
     if last_or_this == 'this':
         models = load_models()
@@ -1489,7 +1489,7 @@ def get_off_stats(team,data,last_or_this,szn):
 
         return df, team_passing, team_rushing, team_receiving
     if last_or_this == 'last':
-        return df, team_passing, team_rushing
+        return df #, team_passing, team_rushing
 
 
 def get_def_stats(team,data):
@@ -2126,7 +2126,7 @@ def main():
 
 
     # Create a select box for user to choose between Preview and Review
-    choice = st.selectbox("Select an Option", ["Preview", "Review","Team Analysis","Receiving Yards Simulation"])
+    choice = st.selectbox("Select an Option", ["Preview", "Review","Team Analysis","Receiving Yards Simulation","Individual Leaders"])
 
     if choice == "Preview":
         with st.container():
@@ -2226,6 +2226,166 @@ def main():
                 st.write(above_threshold)
  
                 
+    elif choice == "Individual Leaders":
+        with st.container():
+            st.write("Please enter the following information:")
+            season = st.number_input("Season")
+            week = st.number_input("Week")
+            minimum_volume = st.number_input("Min. Volume")
+            leaderboard  =st.selectbox("Select an Option", ["Overall Expected Fantasy Points", "Passing","Rushing","Receiving"])
+
+            # Create a button to confirm the selection
+            if st.button("Confirm Selection"):
+                if season and leaderboard:
+                    if leaderboard == 'Overall Expected Fantasy Points':
+                        #st.write('xFP coming soon')
+                        data_all = load_data()
+                        data_df = preprocess_data(data_all)
+                        if week == 0:
+                            data = data_df[(data_df['season'] == season) & (data_df['season_type'] == 'REG')]
+                        else:
+                            data = data_df[(data_df['season'] == season) & (data_df['season_type'] == 'REG')&(data_df['week']==week)]
+
+                        
+                        
+                        
+                        
+                        models = load_models()
+                        yardage_model = models["rec_yardage"]
+                        touchdown_model = models["rec_touchdown"]
+                        rush_yard_model = models['rush_yardage']
+                        rush_td_model = models['rush_touchdown']
+                    
+                        game_by_game_receivers = process_data(data, yardage_model, touchdown_model,season)
+                        szn_receivers = aggregate_season_receivers(game_by_game_receivers)
+
+                        rec_data = szn_receivers.reset_index().drop(columns=['index','team_attempts','team_air_yards','air_yards_share','WOPR']).rename(columns={'xFPs':'rec_xFPs','fantasy_points':'rec_fantasy_points','xTDs':'xTDs_rec','touchdown':'rec_TD','yards_gained':'rec_yards','xYards':'xYards_rec'})
+                        rec_data['player_id'] = rec_data['receiver_player_name']+"_"+rec_data['posteam']
+
+
+                        #st.write(rec_data)
+                        game_by_game_rushers = process_rush_data(data, rush_yard_model, rush_td_model,season)
+                        szn_rushers = aggregate_season_rushers(game_by_game_rushers)
+
+                        rush_data = szn_rushers.reset_index().drop(columns=['index','team_attempts','epa','success','epa/run','success_rate']).rename(columns={'xFPs':'rush_xFPs','fantasy_points':'rush_fantasy_points','xTDs':'xTDs_rush','yards_gained':'rush_yards','xYards':'xYards_rush','touchdown':'rush_touchdown'})
+                        rush_data['player_id'] = rush_data['rusher_player_name']+"_"+rush_data['posteam']
+
+                        fantasy_df = rec_data.merge(rush_data,on='player_id',how='outer').fillna(0).drop(columns=['posteam_x','posteam_y'])
+                        fantasy_df['player'] = fantasy_df['player_id'].apply(lambda x: x.split("_")[0])
+                        fantasy_df['team'] = fantasy_df['player_id'].apply(lambda x: x.split("_")[1])
+                        fantasy_df['Fantasy Points'] = fantasy_df['rush_fantasy_points'] + fantasy_df['rec_fantasy_points']
+                        fantasy_df['xFPs'] = fantasy_df['rec_xFPs'] + fantasy_df['rush_xFPs']
+                        fantasy_df['Diff.'] = fantasy_df['Fantasy Points'] - fantasy_df['xFPs']
+                        fantasy_df = fantasy_df[['player','team','Fantasy Points','xFPs','Diff.','targets','target_share','rec_fantasy_points','rec_xFPs','rec_TD','xTDs_rec','complete_pass','cp','rec_yards','xYards_rec','end_zone_target','rush','designed_run_share','rush_fantasy_points','rush_xFPs','rush_touchdown','xTDs_rush','rush_yards','xYards_rush','goal_to_go']]
+                        fantasy_df.insert(fantasy_df.columns.get_loc("Fantasy Points") + 1, "Fantasy Points Percentile",
+                            fantasy_df["Fantasy Points"].rank(pct=True, ascending=True).round(2))
+
+                        fantasy_df.insert(fantasy_df.columns.get_loc("xFPs") + 1, "xFPs Percentile",
+                            fantasy_df["xFPs"].rank(pct=True, ascending=True).round(2))                                                                    
+
+                        st.write(fantasy_df.sort_values('Diff.',ascending=False))
+
+                    elif leaderboard == 'Receiving':
+                        data_all = load_data()
+                        data_df = preprocess_data(data_all)
+                        if week == 0:
+                            data = data_df[(data_df['season'] == season) & (data_df['season_type'] == 'REG')]
+                        else:
+                            data = data_df[(data_df['season'] == season) & (data_df['season_type'] == 'REG')&(data_df['week']==week)]
+
+                        
+                        
+                        
+                        yac_df = data[data['complete_pass']==1]
+                        yac_df = yac_df.groupby(['receiver_player_name','posteam']).agg({'complete_pass':'sum','yards_after_catch':'sum','xyac_mean_yardage':'sum'})
+                        yac_df = yac_df.reset_index()
+                        yac_df['player_id'] = yac_df['receiver_player_name']+"_"+yac_df['posteam']
+                        yac_df = yac_df[['player_id','yards_after_catch','xyac_mean_yardage']]
+                        yac_df['YAC_delta'] = round(yac_df['yards_after_catch'] - yac_df['xyac_mean_yardage'],1)
+                        
+
+                        models = load_models()
+                        yardage_model = models["rec_yardage"]
+                        touchdown_model = models["rec_touchdown"]
+
+                        game_by_game_receivers = process_data(data, yardage_model, touchdown_model,season)
+                        szn_receivers = aggregate_season_receivers(game_by_game_receivers)
+
+                        rec_data = szn_receivers.reset_index().drop(columns=['index','team_attempts','team_air_yards','air_yards_share','WOPR','xyac_mean_yardage','yards_after_catch'])#.rename(columns={'xFPs':'rec_xFPs','fantasy_points':'rec_fantasy_points','xTDs':'xTDs_rec','touchdown':'rec_TD','yards_gained':'rec_yards','xYards':'xYards_rec'})
+                        rec_data['player_id'] = rec_data['receiver_player_name']+"_"+rec_data['posteam']
+                        new_data = rec_data.merge(yac_df,on='player_id',how='outer').fillna(0).drop(columns=['player_id','air_yards'])                                        
+
+                        st.write(new_data.sort_values('xFPs',ascending=False))
+
+                    elif leaderboard == 'Rushing':
+                        #st.write('xFP coming soon')
+                        data_all = load_data()
+                        data_df = preprocess_data(data_all)
+                        if week == 0:
+                            data = data_df[(data_df['season'] == season) & (data_df['season_type'] == 'REG')]
+                        else:
+                            data = data_df[(data_df['season'] == season) & (data_df['season_type'] == 'REG')&(data_df['week']==week)]
+
+                                            
+                        models = load_models()
+                        rush_yard_model = models['rush_yardage']
+                        rush_td_model = models['rush_touchdown']
+                    
+                        game_by_game_rushers = process_rush_data(data, rush_yard_model, rush_td_model,season)
+                        szn_rushers = aggregate_season_rushers(game_by_game_rushers)
+
+                        rush_data = szn_rushers.reset_index().drop(columns=['index','team_attempts','success'])
+                        rush_data = rush_data[rush_data['rush']>=minimum_volume]
+                        rush_data['yards/carry'] = round(rush_data['yards_gained']/rush_data['rush'],1)
+                        rush_data['20+_play%'] = round(rush_data['20+_play']/rush_data['rush'],3)
+
+                        st.write(rush_data.sort_values('xFPs',ascending=False))
+
+                    elif leaderboard == 'Passing':
+                        data_all = load_data()
+                        data_df = preprocess_data(data_all)
+                        if week == 0:
+                            data = data_df[(data_df['season'] == season) & (data_df['season_type'] == 'REG')]
+                        else:
+                            data = data_df[(data_df['season'] == season) & (data_df['season_type'] == 'REG')&(data_df['week']==week)]
+
+                        pass_data = data[data['pass']==1]
+                        scramble_data = data[(data['pass']==1)&(data['rusher_player_name']!=False)]
+
+                        pass_data = pass_data.groupby(['passer_player_name','posteam'])[['pass','complete_pass','incomplete_pass','pass_touchdown','interception','sack','yards_gained','epa','success','cp','air_yards']].sum().rename(columns={'epa':'pass_epa'})                                                             
+                        
+                        scramble_data = scramble_data.groupby(['rusher_player_name','posteam'])[['pass','yards_gained','epa','success','rush_touchdown']].sum().rename(columns={'pass':'scramble','epa':'scramble_epa','yards_gained':'scramble_yards','success':'scramble_success','rush_touchdown':'scramble_td'})                                                             
+                        scramble_data = scramble_data.reset_index()
+                        scramble_data['player_id'] = scramble_data['rusher_player_name']+"_"+scramble_data['posteam']
+                        scramble_data = scramble_data.drop(columns=['posteam','rusher_player_name'])
+                        
+                        
+                        pass_data = pass_data[pass_data['pass']>=minimum_volume]
+                        pass_data['throw'] = pass_data['complete_pass'] + pass_data['incomplete_pass'] + pass_data['interception']
+                        pass_data['comp%'] = pass_data['complete_pass']/pass_data['throw']
+                        pass_data['xc%'] = pass_data['cp']/pass_data['throw']
+                        pass_data['cpoe'] = pass_data['comp%']- pass_data['xc%']
+                        pass_data['aDOT'] = round(pass_data['air_yards']/pass_data['throw'],1)
+                        pass_data['sack%'] = round(pass_data['sack']/pass_data['pass'],3)
+                        pass_data['TD%'] = round(pass_data['pass_touchdown']/pass_data['throw'],3)
+                        pass_data['INT%'] = round(pass_data['interception']/pass_data['throw'],3)
+                        pass_data['NY/A'] = round(pass_data['yards_gained']/pass_data['pass'],1)
+                        pass_data[['comp%','cpoe']] = pass_data[['comp%','cpoe']].round(3)
+                        pass_data = pass_data.reset_index()
+                        pass_data['player_id'] = pass_data['passer_player_name']+"_"+pass_data['posteam']
+                        pass_data = pass_data.merge(scramble_data,on='player_id',how='outer').fillna(0)
+                        pass_data['dropback'] = pass_data['pass']+pass_data['scramble']
+                        pass_data['dropback_epa'] = round(pass_data['pass_epa'] + pass_data['scramble_epa'],1)
+                        pass_data['scramble_epa'] = pass_data['scramble_epa'].round(1)
+                        pass_data['dropback_success'] = pass_data['success'] + pass_data['scramble_success']
+                        pass_data['epa/dropback'] = round(pass_data['dropback_epa']/pass_data['dropback'],3)
+                        pass_data['success_rate'] = round(pass_data['dropback_success']/pass_data['dropback'],3)
+                        pass_data = pass_data[['passer_player_name','posteam','dropback','dropback_epa','epa/dropback','NY/A','success_rate','pass_touchdown','interception','yards_gained','TD%','INT%','sack%','aDOT','comp%','xc%','cpoe','scramble','scramble_yards','scramble_epa','scramble_td']]
+                        st.write(pass_data.sort_values('dropback_epa',ascending=False).rename(columns={'yards_gained':'net_pass_yards'}))
+                else:
+                    st.warning("Please enter all required information.")
+
+
 
 
 if __name__ == "__main__":
