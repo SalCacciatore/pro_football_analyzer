@@ -1606,7 +1606,7 @@ def get_team_stats(team, year):
 
 
 
-    year2 = get_off_stats(team,last_year_stats,'last',previous)[0]
+    year2 = get_off_stats(team,last_year_stats,'last',previous)
     year2_def = get_def_stats(team,last_year_stats)
 
 
