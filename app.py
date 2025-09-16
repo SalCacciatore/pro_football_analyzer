@@ -2259,7 +2259,7 @@ def main():
                         game_by_game_receivers = process_data(data, yardage_model, touchdown_model,season)
                         szn_receivers = aggregate_season_receivers(game_by_game_receivers)
 
-                        rec_data = szn_receivers.reset_index().drop(columns=['index','team_attempts','team_air_yards','air_yards_share','WOPR']).rename(columns={'xFPs':'rec_xFPs','fantasy_points':'rec_fantasy_points','xTDs':'xTDs_rec','touchdown':'rec_TD','yards_gained':'rec_yards','xYards':'xYards_rec'})
+                        rec_data = szn_receivers.reset_index().drop(columns=['index','team_attempts','team_air_yards','air_yards_share']).rename(columns={'xFPs':'rec_xFPs','fantasy_points':'rec_fantasy_points','xTDs':'xTDs_rec','touchdown':'rec_TD','yards_gained':'rec_yards','xYards':'xYards_rec'})
                         rec_data['player_id'] = rec_data['receiver_player_name']+"_"+rec_data['posteam']
 
 
@@ -2276,7 +2276,7 @@ def main():
                         fantasy_df['Fantasy Points'] = fantasy_df['rush_fantasy_points'] + fantasy_df['rec_fantasy_points']
                         fantasy_df['xFPs'] = fantasy_df['rec_xFPs'] + fantasy_df['rush_xFPs']
                         fantasy_df['Diff.'] = fantasy_df['Fantasy Points'] - fantasy_df['xFPs']
-                        fantasy_df = fantasy_df[['player','team','Fantasy Points','xFPs','Diff.','targets','target_share','rec_fantasy_points','rec_xFPs','rec_TD','xTDs_rec','complete_pass','cp','rec_yards','xYards_rec','end_zone_target','rush','designed_run_share','rush_fantasy_points','rush_xFPs','rush_touchdown','xTDs_rush','rush_yards','xYards_rush','goal_to_go']]
+                        fantasy_df = fantasy_df[['player','team','Fantasy Points','xFPs','Diff.','targets','target_share','WOPR','rec_fantasy_points','rec_xFPs','rec_TD','xTDs_rec','complete_pass','cp','rec_yards','xYards_rec','end_zone_target','rush','designed_run_share','rush_fantasy_points','rush_xFPs','rush_touchdown','xTDs_rush','rush_yards','xYards_rush','goal_to_go']]
                         fantasy_df.insert(fantasy_df.columns.get_loc("Fantasy Points") + 1, "Fantasy Points Percentile",
                             fantasy_df["Fantasy Points"].rank(pct=True, ascending=True).round(2))
 
@@ -2311,7 +2311,7 @@ def main():
                         game_by_game_receivers = process_data(data, yardage_model, touchdown_model,season)
                         szn_receivers = aggregate_season_receivers(game_by_game_receivers)
 
-                        rec_data = szn_receivers.reset_index().drop(columns=['index','team_attempts','team_air_yards','air_yards_share','WOPR','xyac_mean_yardage','yards_after_catch'])#.rename(columns={'xFPs':'rec_xFPs','fantasy_points':'rec_fantasy_points','xTDs':'xTDs_rec','touchdown':'rec_TD','yards_gained':'rec_yards','xYards':'xYards_rec'})
+                        rec_data = szn_receivers.reset_index().drop(columns=['index','team_attempts','team_air_yards','xyac_mean_yardage','yards_after_catch'])#.rename(columns={'xFPs':'rec_xFPs','fantasy_points':'rec_fantasy_points','xTDs':'xTDs_rec','touchdown':'rec_TD','yards_gained':'rec_yards','xYards':'xYards_rec'})
                         rec_data['player_id'] = rec_data['receiver_player_name']+"_"+rec_data['posteam']
                         new_data = rec_data.merge(yac_df,on='player_id',how='outer').fillna(0).drop(columns=['player_id','air_yards'])                                        
 
