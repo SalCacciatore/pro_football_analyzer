@@ -249,7 +249,7 @@ def process_rush_data(data, yardage_model, touchdown_model,szn):
             if offense.empty:
                 continue  # Skip if there's no offense data
 
-            carries = offense['rush'].sum()
+            carries = offense[offense['rusher_player_name'].isna() == False]['rush'].sum()
 
             rushers = offense.groupby(['rusher_player_name', 'posteam', 'game_id', 'week'])[['rush', 'fantasy_points', 'xFPs','yards_gained', 'xYards', 'touchdown', 'xTDs', 'goal_to_go','fumble_lost','epa','success','20+_play']].sum()
             rushers['team_attempts'] = carries
