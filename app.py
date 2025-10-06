@@ -600,7 +600,7 @@ def game_review(game_id):
 
 
 # %%
-    last_szn = data[data['season']==2024]
+    last_szn = data[data['season']==2025]
 
     szn_sr = last_szn.groupby('posteam').agg({'success':'mean'}).reset_index()
 
