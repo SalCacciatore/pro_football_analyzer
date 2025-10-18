@@ -1383,7 +1383,7 @@ def rush_matchup(data, szn, offense, defense):
 
 with header:
     st.title("FOOTBALL PREVIEW/REVIEW")
-    st.write("All data from NFLVerse.")
+    st.write("Data, CP and YAC models from NFLVerse. Other models are my own.")
 
 
 def get_off_stats(team,data,last_or_this,szn):
