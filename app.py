@@ -1136,7 +1136,7 @@ def overall_creator(data, szn, offense, defense):
         'PIT': 'yellow',
         'SEA': 'blue',
         'SF': 'red',
-        'TB': 'black',
+        'TB': 'red',
         'TEN': 'red',
         'WAS': 'red',
     }
@@ -1240,7 +1240,7 @@ def pass_matchup(data, szn, offense, defense):
         'PIT': 'yellow',
         'SEA': 'blue',
         'SF': 'red',
-        'TB': 'black',
+        'TB': 'red',
         'TEN': 'red',
         'WAS': 'red',
     }
@@ -1339,7 +1339,7 @@ def rush_matchup(data, szn, offense, defense):
         'PIT': 'yellow',
         'SEA': 'blue',
         'SF': 'red',
-        'TB': 'black',
+        'TB': 'red',
         'TEN': 'red',
         'WAS': 'red',
     }
