@@ -2244,7 +2244,7 @@ def main():
                         if week == 0:
                             data = data_df[(data_df['season'] == season) & (data_df['season_type'] == 'REG')]
                         else:
-                            data = data_df[(data_df['season'] == season) & (data_df['season_type'] == 'REG')&(data_df['week']==week)]
+                            data = data_df[(data_df['season'] == season) & (data_df['week']==week)]
 
                         
                         
