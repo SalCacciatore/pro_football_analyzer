@@ -1,4 +1,4 @@
-pandas
+pandas<3
 plotly
 numpy
 xgboost==2.0.3

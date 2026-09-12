@@ -752,7 +752,7 @@ def game_review(game_id):
 
 
     for i in range(len(columns)):
-        fig2.add_annotation(x=columns[i], y=host_sr.loc[host_sr.index[0]][i]+0.01,
+        fig2.add_annotation(x=columns[i], y=host_sr.iloc[0].iloc[i]+0.01,
                        text=host_percentile_list[i],
                        showarrow=False)    
 
@@ -803,7 +803,7 @@ def game_review(game_id):
 
 
     for i in range(len(columns)):
-        fig3.add_annotation(x=columns[i], y=visitor_sr.loc[visitor_sr.index[0]][i]+0.01,
+        fig3.add_annotation(x=columns[i], y=visitor_sr.iloc[0].iloc[i]+0.01,
                        text=visitor_percentile_list[i],
                        showarrow=False)    
 
@@ -912,7 +912,7 @@ def game_review(game_id):
             perc_list.append(perc) 
 
         for i in range(len(columns)):
-            fig4.add_annotation(x=columns[i], y=offense_table.loc[offense_table.index[0]][i]+0.01, text=perc_list[i], showarrow=False)    
+            fig4.add_annotation(x=columns[i], y=offense_table.iloc[0].iloc[i]+0.01, text=perc_list[i], showarrow=False)    
 
 
         fig4.update_layout(barmode='group', title_text=f"{offense} Offense Week {week} -- {capitalize_first_letter(pass_or_rush)}ing")
