@@ -1154,7 +1154,7 @@ def overall_creator(data, szn, offense, defense):
     if szn == 2026:
         fig.update_layout(title=f"{offense} Offense vs. {defense} Defense")
     else:
-        fig.update_layout(title=f"{offense} Offense vs. {defense} Defense ({szn} stats)")
+        fig.update_layout(title=f"{offense} Offense vs. {defense} Defense ({int(szn)} stats)")
 
 
 # Update the y-axis title
@@ -1258,7 +1258,7 @@ def pass_matchup(data, szn, offense, defense):
     if szn == 2026:
         fig.update_layout(title=f"{offense} Pass Offense vs. {defense} Pass Defense")
     else:
-        fig.update_layout(title=f"{offense} Pass Offense vs. {defense} Pass Defense ({szn} stats)")
+        fig.update_layout(title=f"{offense} Pass Offense vs. {defense} Pass Defense ({int(szn)} stats)")
 
 
 # Update the y-axis title
@@ -1357,7 +1357,7 @@ def rush_matchup(data, szn, offense, defense):
     if szn == 2026:
         fig.update_layout(title=f"{offense} Rush Offense vs. {defense} Rush Defense")
     else:
-        fig.update_layout(title=f"{offense} Rush Offense vs. {defense} Rush Defense ({szn} stats)")
+        fig.update_layout(title=f"{offense} Rush Offense vs. {defense} Rush Defense ({int(szn)} stats)")
 
 
 # Update the y-axis title
