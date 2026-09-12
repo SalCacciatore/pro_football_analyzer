@@ -1164,7 +1164,7 @@ def overall_creator(data, szn, offense, defense):
     fig.update_xaxes(title_text="")
 
 # Add a footnote
-    footnote = "Higher is better for both offense and defense; a higher defensive PROE means opposing offenses have been more run-heavy"
+    footnote = "Higher is better for both offense and defense; a higher defensive PROE means opposing offenses have been more run-heavy\nData: nflverse\nChart: @SCacc8\nwww.sportsandmaybeotherthings.com"
     fig.add_annotation(
         text=footnote,
         xref="paper", yref="paper",
@@ -1268,7 +1268,7 @@ def pass_matchup(data, szn, offense, defense):
     fig.update_xaxes(title_text="")
 
 # Add a footnote
-    footnote = "Higher is better for both offense and defense"
+    footnote = "Higher is better for both offense and defense\nData: nflverse\nChart: @SCacc8\nwww.sportsandmaybeotherthings.com"
     fig.add_annotation(
         text=footnote,
         xref="paper", yref="paper",
@@ -1367,7 +1367,7 @@ def rush_matchup(data, szn, offense, defense):
     fig.update_xaxes(title_text="")
 
 # Add a footnote
-    footnote = "Higher is better for both offense and defense"
+    footnote = "Higher is better for both offense and defense\nData: nflverse\nChart: @SCacc8\nwww.sportsandmaybeotherthings.com"
     fig.add_annotation(
         text=footnote,
         xref="paper", yref="paper",
