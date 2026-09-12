@@ -1283,7 +1283,7 @@ def pass_matchup(data, szn, offense, defense):
         font=dict(size=11, color="gray"),
     )
 
-fig.update_layout(margin=dict(b=130))
+    fig.update_layout(margin=dict(b=130))
 
 # Display the chart
     return fig
