@@ -14,7 +14,7 @@ from typing import Tuple, List
 import random
 
 
-this_season = 2025
+this_season = 2026
 
 # Caching models
 #@st.cache_resource
@@ -302,7 +302,7 @@ def aggregate_season_rushers(game_by_game_rushers):
 #@st.cache_data
 def load_data():
     data_all = pd.DataFrame()
-    YEARS = [2023,2024,2025]
+    YEARS = [2023,2024,2025,2026]
 
     for i in YEARS:
         i_data = pd.read_csv('https://github.com/nflverse/nflverse-data/releases/download/pbp/' \
@@ -600,7 +600,12 @@ def game_review(game_id):
 
 
 # %%
-    last_szn = data[data['season']==2025]
+    week_int = int(game_id.split("_")[1])
+    if year_int == 2026 and week_int in (1, 2, 3):
+        baseline_szn = 2025
+    else:
+        baseline_szn = year_int
+    last_szn = data[data['season']==baseline_szn]
 
     szn_sr = last_szn.groupby('posteam').agg({'success':'mean'}).reset_index()
 
