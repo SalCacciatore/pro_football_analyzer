@@ -1168,10 +1168,14 @@ def overall_creator(data, szn, offense, defense):
     fig.add_annotation(
         text=footnote,
         xref="paper", yref="paper",
-        x=0.5, y=-0.15,
+        x=0, y=-0.18,
+        xanchor="left", yanchor="top",
+        align="left",
         showarrow=False,
-        font=dict(size=10),
+        font=dict(size=11, color="gray"),
     )
+
+    fig.update_layout(margin=dict(b=130))
 
 # Display the chart
     return fig
@@ -1272,10 +1276,14 @@ def pass_matchup(data, szn, offense, defense):
     fig.add_annotation(
         text=footnote,
         xref="paper", yref="paper",
-        x=0.5, y=-0.15,
+        x=0, y=-0.18,
+        xanchor="left", yanchor="top",
+        align="left",
         showarrow=False,
-        font=dict(size=10),
+        font=dict(size=11, color="gray"),
     )
+
+fig.update_layout(margin=dict(b=130))
 
 # Display the chart
     return fig
@@ -1371,10 +1379,14 @@ def rush_matchup(data, szn, offense, defense):
     fig.add_annotation(
         text=footnote,
         xref="paper", yref="paper",
-        x=0.5, y=-0.15,
+        x=0, y=-0.18,
+        xanchor="left", yanchor="top",
+        align="left",
         showarrow=False,
-        font=dict(size=10),
+        font=dict(size=11, color="gray"),
     )
+
+    fig.update_layout(margin=dict(b=130))
 
 # Display the chart
     return fig
