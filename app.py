@@ -1151,7 +1151,7 @@ def overall_creator(data, szn, offense, defense):
     )
 
 # Set the chart title
-    if szn == 2025:
+    if szn == 2026:
         fig.update_layout(title=f"{offense} Offense vs. {defense} Defense")
     else:
         fig.update_layout(title=f"{offense} Offense vs. {defense} Defense ({szn} stats)")
@@ -1255,7 +1255,7 @@ def pass_matchup(data, szn, offense, defense):
     )
 
 # Set the chart title
-    if szn == 2023:
+    if szn == 2026:
         fig.update_layout(title=f"{offense} Pass Offense vs. {defense} Pass Defense")
     else:
         fig.update_layout(title=f"{offense} Pass Offense vs. {defense} Pass Defense ({szn} stats)")
@@ -1354,7 +1354,7 @@ def rush_matchup(data, szn, offense, defense):
     )
 
 # Set the chart title
-    if szn == this_season:
+    if szn == 2026:
         fig.update_layout(title=f"{offense} Rush Offense vs. {defense} Rush Defense")
     else:
         fig.update_layout(title=f"{offense} Rush Offense vs. {defense} Rush Defense ({szn} stats)")
