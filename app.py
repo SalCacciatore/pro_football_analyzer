@@ -621,7 +621,7 @@ def game_review(game_id):
     else:
         baseline_szn = year_int
     data[data['season']==baseline_szn]
-    
+
     lg_success = data['success'].mean()
 
     lg_early = data[data['down']<3]['success'].mean()
@@ -834,7 +834,7 @@ def game_review(game_id):
     fig2.update_layout(barmode='group', title_text=f"{host} Offense Week {game['week'].max()} -- Success Rate")
     fig2.update_yaxes(range=[0.2, 0.7])
 
-    footnote = "Blue line: NFL average<br>Green line: Offensive team average (2025 season)<br>Red line: Defensive team average (2025 season)<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
+    footnote = "Blue line: NFL average (2025 season)<br>Green line: Offensive team average (2025 season)<br>Red line: Defensive team average (2025 season)<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
     fig2.add_annotation(
         text=footnote,
         xref="paper", yref="paper",
@@ -901,7 +901,7 @@ def game_review(game_id):
 
     fig3.update_layout(barmode='group', title_text=f"{visitor} Offense Week {game['week'].max()} -- Success Rate")
     fig3.update_yaxes(range=[0.2, 0.7])
-    footnote = "Blue line: NFL average<br>Green line: Offensive team average (2025 season)<br>Red line: Defensive team average (2025 season)<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
+    footnote = "Blue line: NFL average (2025 season)<br>Green line: Offensive team average (2025 season)<br>Red line: Defensive team average (2025 season)<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
     fig3.add_annotation(
         text=footnote,
         xref="paper", yref="paper",
