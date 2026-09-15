@@ -817,13 +817,17 @@ def game_review(game_id):
     off_late = szn_late[szn_late['posteam']==visitor]['success'].values[0]
     off_short = szn_short[szn_short['posteam']==visitor]['success'].values[0]
     off_red = szn_red[szn_red['posteam']==visitor]['success'].values[0]
+    off_pass = szn_pass[szn_pass['posteam']==visitor]['success'].values[0]
+    off_rush = szn_rush[szn_rush['posteam']==visitor]['success'].values[0]
+
 
     def_avg_sr = szn_sr_d[szn_sr_d['defteam']==host]['success'].values[0]
     def_early = szn_early_d[szn_early_d['defteam']==host]['success'].values[0]
     def_late = szn_late_d[szn_late_d['defteam']==host]['success'].values[0]
     def_short = szn_short_d[szn_short_d['defteam']==host]['success'].values[0]
     def_red = szn_red_d[szn_red_d['defteam']==host]['success'].values[0]
-
+    def_pass = szn_pass_d[szn_pass_d['defteam']==host]['success'].values[0]
+    def_rush = szn_rush_d[szn_rush_d['defteam']==host]['success'].values[0]
 
     columns = ['overall', 'early down', 'late down', 'short yardage', 'red zone']
     bar_width = 0.25
