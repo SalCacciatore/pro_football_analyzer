@@ -829,7 +829,7 @@ def game_review(game_id):
     def_pass = szn_pass_d[szn_pass_d['defteam']==host]['success'].values[0]
     def_rush = szn_rush_d[szn_rush_d['defteam']==host]['success'].values[0]
 
-    columns = ['overall', 'early down', 'late down', 'short yardage', 'red zone']
+    #columns = ['overall', 'early down', 'late down', 'short yardage', 'red zone']
     bar_width = 0.25
     r = np.arange(len(columns))
     line_values = [lg_success,lg_pass,lg_rush,lg_early,lg_late,lg_short,lg_red]
