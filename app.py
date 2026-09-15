@@ -809,8 +809,16 @@ def game_review(game_id):
 
     footnote = "Blue line: NFL average<br>Green line: Offensive team average (2025 season)<br>Red line: Defensive team average (2025 season)<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
     fig2.add_annotation(
-        text=footnote)
-    #fig2.show()
+        text=footnote,
+        xref="paper", yref="paper",
+        x=0, y=-0.18,
+        xanchor="left", yanchor="top",
+        align="left",
+        showarrow=False,
+        font=dict(size=11, color="gray"),
+    )
+
+    fig.update_layout(margin=dict(b=130))
 
 
 # %%
@@ -868,8 +876,16 @@ def game_review(game_id):
     fig3.update_yaxes(range=[0.2, 0.7])
     footnote = "Blue line: NFL average<br>Green line: Offensive team average (2025 season)<br>Red line: Defensive team average (2025 season)<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
     fig3.add_annotation(
-        text=footnote)
-    #fig.show()
+        text=footnote,
+        xref="paper", yref="paper",
+        x=0, y=-0.18,
+        xanchor="left", yanchor="top",
+        align="left",
+        showarrow=False,
+        font=dict(size=11, color="gray"),
+    )
+
+    fig.update_layout(margin=dict(b=130))
 
 
 # %%
@@ -1018,8 +1034,16 @@ def game_review(game_id):
     fig5.update_layout(barmode='group', title_text=game_id+"EPA Breakdown")
     footnote = "Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
     fig5.add_annotation(
-        text=footnote)
-    #fig5.show()
+        text=footnote,
+        xref="paper", yref="paper",
+        x=0, y=-0.18,
+        xanchor="left", yanchor="top",
+        align="left",
+        showarrow=False,
+        font=dict(size=11, color="gray"),
+    )
+
+    fig.update_layout(margin=dict(b=130))
 
 
 # %%
