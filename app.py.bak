@@ -14,7 +14,7 @@ from typing import Tuple, List
 import random
 
 
-this_season = 2026
+this_season = 2025
 
 # Caching models
 #@st.cache_resource
@@ -302,7 +302,7 @@ def aggregate_season_rushers(game_by_game_rushers):
 #@st.cache_data
 def load_data():
     data_all = pd.DataFrame()
-    YEARS = [2023,2024,2025,2026]
+    YEARS = [2023,2024,2025]
 
     for i in YEARS:
         i_data = pd.read_csv('https://github.com/nflverse/nflverse-data/releases/download/pbp/' \
@@ -600,12 +600,7 @@ def game_review(game_id):
 
 
 # %%
-    week_int = int(game_id.split("_")[1])
-    if year_int == 2026 and week_int in (1, 2, 3):
-        baseline_szn = 2025
-    else:
-        baseline_szn = year_int
-    last_szn = data[data['season']==baseline_szn]
+    last_szn = data[data['season']==2025]
 
     szn_sr = last_szn.groupby('posteam').agg({'success':'mean'}).reset_index()
 
@@ -757,7 +752,7 @@ def game_review(game_id):
 
 
     for i in range(len(columns)):
-        fig2.add_annotation(x=columns[i], y=host_sr.iloc[0].iloc[i]+0.01,
+        fig2.add_annotation(x=columns[i], y=host_sr.loc[host_sr.index[0]][i]+0.01,
                        text=host_percentile_list[i],
                        showarrow=False)    
 
@@ -808,7 +803,7 @@ def game_review(game_id):
 
 
     for i in range(len(columns)):
-        fig3.add_annotation(x=columns[i], y=visitor_sr.iloc[0].iloc[i]+0.01,
+        fig3.add_annotation(x=columns[i], y=visitor_sr.loc[visitor_sr.index[0]][i]+0.01,
                        text=visitor_percentile_list[i],
                        showarrow=False)    
 
@@ -917,7 +912,7 @@ def game_review(game_id):
             perc_list.append(perc) 
 
         for i in range(len(columns)):
-            fig4.add_annotation(x=columns[i], y=offense_table.iloc[0].iloc[i]+0.01, text=perc_list[i], showarrow=False)    
+            fig4.add_annotation(x=columns[i], y=offense_table.loc[offense_table.index[0]][i]+0.01, text=perc_list[i], showarrow=False)    
 
 
         fig4.update_layout(barmode='group', title_text=f"{offense} Offense Week {week} -- {capitalize_first_letter(pass_or_rush)}ing")
@@ -945,9 +940,6 @@ def game_review(game_id):
 
     passing_epa_df = throws_df.merge(team_scramble_df,right_index=True,left_index=True,how='outer').merge(sack_df,right_index=True,left_index=True, how='outer').merge(pass_turnover_df,right_index=True,left_index=True, how='outer').fillna(0)
 
-    rushing_epa_df = game[game['rush']==1].groupby('posteam').agg({'epa':'sum'}).rename(columns={'epa':'designed_run_epa'})
-
-    epa_df = passing_epa_df.merge(rushing_epa_df,right_index=True,left_index=True,how='outer')
 
 
 
@@ -958,11 +950,11 @@ def game_review(game_id):
     fig5 = go.Figure()
 
     for i, idx in enumerate(passing_epa_df.index):
-        fig5.add_trace(go.Bar(x=epa_df.columns, y=epa_df.loc[idx], name=str(idx)))
+        fig5.add_trace(go.Bar(x=passing_epa_df.columns, y=passing_epa_df.loc[idx], name=str(idx)))
 
 
 
-    fig5.update_layout(barmode='group', title_text=game_id+"EPA Breakdown")
+    fig5.update_layout(barmode='group', title_text=game_id+" Passing EPA Breakdown")
 
     #fig5.show()
 
