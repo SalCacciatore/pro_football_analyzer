@@ -562,6 +562,11 @@ def game_review(game_id):
 
     redzone = game[game['yardline_100']<21].groupby('posteam').agg({'success':'mean'}).rename(columns={'success':'red zone'})
 
+    passing = game[game['pass']==1].groupby('posteam').agg({'success':'mean'}).rename(columns={'success':'dropbacks'})
+
+    rushing = game[game['rush']==1].groupby('posteam').agg({'success':'mean'}).rename(columns={'success':'designed runs'})
+
+
     if redzone.shape[0] == 2:
         pass
     else: 
@@ -577,8 +582,7 @@ def game_review(game_id):
                 redzone = pd.concat([redzone,ndf])
 
     
-    success_rate = overall_sr.merge(early_down,right_index=True,left_index=True).merge(late_down,right_index=True,left_index=True).merge(short_yardage,right_index=True,left_index=True).merge(redzone, right_index=True,left_index=True)
-    success_rate = overall_sr.merge(early_down,right_index=True,left_index=True).merge(late_down,right_index=True,left_index=True).merge(short_yardage,right_index=True,left_index=True).merge(redzone, right_index=True,left_index=True)
+    success_rate = overall_sr.merge(early_down,right_index=True,left_index=True).merge(late_down,right_index=True,left_index=True).merge(short_yardage,right_index=True,left_index=True).merge(redzone, right_index=True,left_index=True).merge(passing,right_index=True,left_index=True).merge(rushing,right_index=True,left_index=True)
 
 # %%
     team_success_rate = success_rate.reset_index()
@@ -598,6 +602,10 @@ def game_review(game_id):
 
     lg_red = data[data['yardline_100']<21]['success'].mean()
 
+    lg_pass = data[data['pass']==1]['success'].mean()
+
+    lg_rush = data[data['rush']==1]['success'].mean()
+
 
 # %%
     week_int = int(game_id.split("_")[1])
@@ -616,7 +624,9 @@ def game_review(game_id):
     szn_short = last_szn[last_szn['ydstogo']<3].groupby('posteam').agg({'success':'mean'}).reset_index()
     szn_red = last_szn[last_szn['yardline_100']<21].groupby('posteam').agg({'success':'mean'}).reset_index()
 
+    szn_pass = last_szn[last_szn['pass']==1].groupby('posteam').agg({'success':'mean'}).reset_index()
 
+    szn_rush = last_szn[last_szn['rush']==1].groupby('posteam').agg({'success':'mean'}).reset_index()
 
 
     szn_sr_d = last_szn.groupby('defteam').agg({'success':'mean'}).reset_index()
@@ -628,6 +638,9 @@ def game_review(game_id):
     szn_short_d = last_szn[last_szn['ydstogo']<3].groupby('defteam').agg({'success':'mean'}).reset_index()
     szn_red_d = last_szn[last_szn['yardline_100']<21].groupby('defteam').agg({'success':'mean'}).reset_index()
 
+    szn_pass_d = last_szn[last_szn['pass']==1].groupby('defteam').agg({'success':'mean'}).reset_index()
+
+    szn_rush_d = last_szn[last_szn['rush']==1].groupby('defteam').agg({'success':'mean'}).reset_index()
 
 # %%
     success_all = data.groupby(['posteam','game_id']).agg({'success':'mean'})
@@ -658,6 +671,19 @@ def game_review(game_id):
     sr_short_perc = str(int((success_short[success_short.index==(host, game_id)]['sr_perc']*100).values[0]))+"th percentile"
 
 
+    success_pass = data[data['pass']==1].groupby(['posteam','game_id']).agg({'success':'mean'})
+
+    success_pass['sr_perc'] = success_pass['success'].rank(pct=True).round(2)
+
+    sr_pass_perc = str(int((success_pass[success_pass.index==(host, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+
+    success_rush = data[data['rush']==1].groupby(['posteam','game_id']).agg({'success':'mean'})
+
+    success_rush['sr_perc'] = success_rush['success'].rank(pct=True).round(2)
+
+    sr_rush_perc = str(int((success_rush[success_rush.index==(host, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+
+
     success_red = data[data['yardline_100']<21].groupby(['posteam','game_id']).agg({'success':'mean'})
 
     success_red['sr_perc'] = success_red['success'].rank(pct=True).round(2)
@@ -668,7 +694,7 @@ def game_review(game_id):
         sr_red_perc = str(int((success_red[success_red.index==(host, game_id)]['sr_perc']*100).values[0]))+"th percentile"
 
 # %%
-    host_percentile_list = [sr_perc, sr_early_perc, sr_late_perc, sr_short_perc, sr_red_perc]
+    host_percentile_list = [sr_perc, sr_pass_perc,sr_rush_perc,sr_early_perc, sr_late_perc, sr_short_perc, sr_red_perc]
 
 
 
@@ -700,6 +726,20 @@ def game_review(game_id):
 
     sr_short_perc = str(int((success_short[success_short.index==(visitor, game_id)]['sr_perc']*100).values[0]))+"th percentile"
 
+    success_pass = data[data['pass']==1].groupby(['posteam','game_id']).agg({'success':'mean'})
+
+    success_pass['sr_perc'] = success_pass['success'].rank(pct=True).round(2)
+
+    sr_pass_perc = str(int((success_pass[success_pass.index==(visitor, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+
+    success_rush = data[data['rush']==1].groupby(['posteam','game_id']).agg({'success':'mean'})
+
+    success_rush['sr_perc'] = success_rush['success'].rank(pct=True).round(2)
+
+    sr_rush_perc = str(int((success_rush[success_rush.index==(visitor, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+
+
+
 
     success_red = data[data['yardline_100']<21].groupby(['posteam','game_id']).agg({'success':'mean'})
 
@@ -711,7 +751,7 @@ def game_review(game_id):
         sr_red_perc = str(int((success_red[success_red.index==(visitor, game_id)]['sr_perc']*100).values[0]))+"th percentile"
 
 # %%
-    visitor_percentile_list = [sr_perc, sr_early_perc, sr_late_perc, sr_short_perc, sr_red_perc]
+    visitor_percentile_list = [sr_perc, sr_pass_perc,sr_rush_perc,sr_early_perc, sr_late_perc, sr_short_perc, sr_red_perc]
 
 
 # %%
@@ -722,20 +762,23 @@ def game_review(game_id):
     off_late = szn_late[szn_late['posteam']==host]['success'].values[0]
     off_short = szn_short[szn_short['posteam']==host]['success'].values[0]
     off_red = szn_red[szn_red['posteam']==host]['success'].values[0]
+    off_pass = szn_pass[szn_pass['posteam']==host]['success'].values[0]
+    off_rush = szn_rush[szn_rush['posteam']==host]['success'].values[0]
 
     def_avg_sr = szn_sr_d[szn_sr_d['defteam']==visitor]['success'].values[0]
     def_early = szn_early_d[szn_early_d['defteam']==visitor]['success'].values[0]
     def_late = szn_late_d[szn_late_d['defteam']==visitor]['success'].values[0]
     def_short = szn_short_d[szn_short_d['defteam']==visitor]['success'].values[0]
     def_red = szn_red_d[szn_red_d['defteam']==visitor]['success'].values[0]
+    def_pass = szn_pass_d[szn_pass_d['defteam']==visitor]['success'].values[0]
+    def_rush = szn_rush_d[szn_rush_d['defteam']==visitor]['success'].values[0]
 
-
-    columns = ['overall', 'early down', 'late down', 'short yardage', 'red zone']
+    columns = ['overall','dropbacks','designed runs', 'early down', 'late down', 'short yardage', 'red zone']
     bar_width = 0.25
     r = np.arange(len(columns))
-    line_values = [lg_success,lg_early,lg_late,lg_short,lg_red]
-    off_avg = [off_avg_sr,off_early,off_late,off_short,off_red]
-    def_avg = [def_avg_sr,def_early,def_late,def_short,def_red]
+    line_values = [lg_success,lg_pass, lg_rush,lg_early,lg_late,lg_short,lg_red]
+    off_avg = [off_avg_sr,off_pass,off_rush,off_early,off_late,off_short,off_red]
+    def_avg = [def_avg_sr,def_pass,def_rush,def_early,def_late,def_short,def_red]
 
     fig2 = go.Figure()
 
