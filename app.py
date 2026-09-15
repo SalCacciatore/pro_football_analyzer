@@ -832,9 +832,9 @@ def game_review(game_id):
     columns = ['overall', 'early down', 'late down', 'short yardage', 'red zone']
     bar_width = 0.25
     r = np.arange(len(columns))
-    line_values = [lg_success,lg_early,lg_late,lg_short,lg_red]
-    off_avg = [off_avg_sr,off_early,off_late,off_short,off_red]
-    def_avg = [def_avg_sr,def_early,def_late,def_short,def_red]
+    line_values = [lg_success,lg_pass,lg_rush,lg_early,lg_late,lg_short,lg_red]
+    off_avg = [off_avg_sr,lg_pass,lg_rush,off_early,off_late,off_short,off_red]
+    def_avg = [def_avg_sr,def_pass,def_rush,def_early,def_late,def_short,def_red]
 
     fig3 = go.Figure()
 
