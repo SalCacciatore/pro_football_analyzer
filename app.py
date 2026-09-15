@@ -623,21 +623,21 @@ def game_review(game_id):
     else:
         baseline_szn = year_int
         
-    data = data[data['season']==baseline_szn]
+    data_last = data[data['season']==baseline_szn]
 
-    lg_success = data['success'].mean()
+    lg_success = data_last['success'].mean()
 
-    lg_early = data[data['down']<3]['success'].mean()
+    lg_early = data_last[data_last['down']<3]['success'].mean()
 
-    lg_late = data[data['down']>2]['success'].mean()
+    lg_late = data_last[data_last['down']>2]['success'].mean()
 
-    lg_short = data[data['ydstogo']<3]['success'].mean()
+    lg_short = data_last[data_last['ydstogo']<3]['success'].mean()
 
-    lg_red = data[data['yardline_100']<21]['success'].mean()
+    lg_red = data_last[data_last['yardline_100']<21]['success'].mean()
 
-    lg_pass = data[data['pass']==1]['success'].mean()
+    lg_pass = data_last[data_last['pass']==1]['success'].mean()
 
-    lg_rush = data[data['rush']==1]['success'].mean()
+    lg_rush = data_last[data_last['rush']==1]['success'].mean()
 
 
 # %%
