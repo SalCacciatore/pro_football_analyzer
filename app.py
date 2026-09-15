@@ -1031,7 +1031,7 @@ def game_review(game_id):
 
 
 
-    fig5.update_layout(barmode='group', title_text=game_id+"EPA Breakdown")
+    fig5.update_layout(barmode='group', title_text=game_id+" EPA Breakdown")
     footnote = "Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
     fig5.add_annotation(
         text=footnote,
