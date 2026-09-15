@@ -616,6 +616,12 @@ def game_review(game_id):
     host_sr = team_success_rate[team_success_rate['posteam']==host].round(3).set_index('posteam')
 
 # %%
+    if year_int == 2026 and week_int in (1, 2, 3):
+        baseline_szn = 2025
+    else:
+        baseline_szn = year_int
+    data[data['season']==baseline_szn]
+    
     lg_success = data['success'].mean()
 
     lg_early = data[data['down']<3]['success'].mean()
@@ -633,10 +639,7 @@ def game_review(game_id):
 
 # %%
     week_int = int(game_id.split("_")[1])
-    if year_int == 2026 and week_int in (1, 2, 3):
-        baseline_szn = 2025
-    else:
-        baseline_szn = year_int
+
     last_szn = data[data['season']==baseline_szn]
 
     szn_sr = last_szn.groupby('posteam').agg({'success':'mean'}).reset_index()
