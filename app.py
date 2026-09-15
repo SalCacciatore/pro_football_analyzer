@@ -582,7 +582,7 @@ def game_review(game_id):
                 redzone = pd.concat([redzone,ndf])
 
     
-    success_rate = overall_sr.merge(early_down,right_index=True,left_index=True).merge(late_down,right_index=True,left_index=True).merge(short_yardage,right_index=True,left_index=True).merge(redzone, right_index=True,left_index=True).merge(passing,right_index=True,left_index=True).merge(rushing,right_index=True,left_index=True)
+    success_rate = overall_sr.merge(passing,right_index=True,left_index=True).merge(rushing,right_index=True,left_index=True).merge(early_down,right_index=True,left_index=True).merge(late_down,right_index=True,left_index=True).merge(short_yardage,right_index=True,left_index=True).merge(redzone, right_index=True,left_index=True)
 
 # %%
     team_success_rate = success_rate.reset_index()
