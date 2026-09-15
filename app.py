@@ -818,7 +818,7 @@ def game_review(game_id):
         font=dict(size=11, color="gray"),
     )
 
-    fig.update_layout(margin=dict(b=130))
+    fig2.update_layout(margin=dict(b=130))
 
 
 # %%
@@ -885,7 +885,7 @@ def game_review(game_id):
         font=dict(size=11, color="gray"),
     )
 
-    fig.update_layout(margin=dict(b=130))
+    fig3.update_layout(margin=dict(b=130))
 
 
 # %%
@@ -1043,7 +1043,7 @@ def game_review(game_id):
         font=dict(size=11, color="gray"),
     )
 
-    fig.update_layout(margin=dict(b=130))
+    fig5.update_layout(margin=dict(b=130))
 
 
 # %%
