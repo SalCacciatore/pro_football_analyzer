@@ -391,6 +391,19 @@ def wp_graph(dataframe, game_id):
         xaxis=dict(showticklabels=False)  # Combine axis updates into layout settings
     )
 
+    footnote = "Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
+    fig.add_annotation(
+        text=footnote,
+        xref="paper", yref="paper",
+        x=0, y=-0.18,
+        xanchor="left", yanchor="top",
+        align="left",
+        showarrow=False,
+        font=dict(size=11, color="gray"),
+    )
+
+    fig.update_layout(margin=dict(b=130))
+
     return fig
 
 
@@ -545,7 +558,18 @@ def game_review(game_id):
 
 # Assuming points_df is your DataFrame
     points_fig = px.bar(points_df, x='epa', y='difference (home team)', orientation='h')
+    footnote = "Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
+    points_fig.add_annotation(
+        text=footnote,
+        xref="paper", yref="paper",
+        x=0, y=-0.18,
+        xanchor="left", yanchor="top",
+        align="left",
+        showarrow=False,
+        font=dict(size=11, color="gray"),
+    )
 
+    points_fig.update_layout(margin=dict(b=130))
     #fig.show()
 
 
