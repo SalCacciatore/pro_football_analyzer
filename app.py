@@ -806,6 +806,10 @@ def game_review(game_id):
 
     fig2.update_layout(barmode='group', title_text=f"{host} Offense Week {game['week'].max()} -- Success Rate")
     fig2.update_yaxes(range=[0.2, 0.7])
+
+    footnote = "Blue line: NFL average<br>Green line: Offensive team average (2025 season)<br>Red line: Defensive team average (2025 season)<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
+    fig2.add_annotation(
+        text=footnote)
     #fig2.show()
 
 
@@ -862,7 +866,9 @@ def game_review(game_id):
 
     fig3.update_layout(barmode='group', title_text=f"{visitor} Offense Week {game['week'].max()} -- Success Rate")
     fig3.update_yaxes(range=[0.2, 0.7])
-
+    footnote = "Blue line: NFL average<br>Green line: Offensive team average (2025 season)<br>Red line: Defensive team average (2025 season)<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
+    fig3.add_annotation(
+        text=footnote)
     #fig.show()
 
 
@@ -1010,7 +1016,9 @@ def game_review(game_id):
 
 
     fig5.update_layout(barmode='group', title_text=game_id+"EPA Breakdown")
-
+    footnote = "Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
+    fig5.add_annotation(
+        text=footnote)
     #fig5.show()
 
 
