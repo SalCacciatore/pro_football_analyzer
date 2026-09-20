@@ -48,7 +48,66 @@ def load_models():
 
 
 
+def fantasy_barbell(df, team, week_int):
+    actual = 'Actual fantasy points'
+    expected = 'Expected fantasy points'
 
+    fig = px.scatter(
+        df, x=[actual, expected], y='player',
+        color_discrete_map={actual: '#1f77b4', expected: '#ff7f0e'}
+    )
+
+    # Dots: bigger, white outline, clean hover
+    fig.update_traces(
+        marker=dict(size=13, line=dict(width=1.5, color='white')),
+        hovertemplate='<b>%{y}</b><br>%{x:.1f} pts<extra></extra>'
+    )
+
+    # Connector lines behind the dots
+    for _, row in df.iterrows():
+        fig.add_shape(
+            type='line',
+            x0=row[actual], y0=row['player'],
+            x1=row[expected], y1=row['player'],
+            line=dict(color='#d9d9d9', width=4),
+            layer='below'
+        )
+
+    fig.update_layout(
+        template='plotly_white',
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        height=max(400, 38 * len(df) + 290),
+        title=dict(
+            text=f"<b>{team} Fantasy Scoring: Week {week_int}</b>",
+            x=0, xanchor='left'
+        ),
+        font=dict(family='Inter, Arial, sans-serif', size=13, color='#333'),
+        legend=dict(orientation='h', x=0, xanchor='left', y=1.0, yanchor='bottom', title_text=''),
+        margin=dict(l=10, r=20, t=100, b=180),
+        xaxis=dict(title='Fantasy points', rangemode='tozero', gridcolor='#eeeeee', zeroline=False),
+        yaxis=dict(title=None, showgrid=False, automargin=True),
+    )
+
+    fig.add_annotation(
+        text=(
+            "Point per reception scoring<br>"
+            "Rushing and receiving only<br>"
+            "Expected fantasy points combine Sal Cacciatore's xYards and xTD model output<br>"
+            "with nflverse's completion probability model output<br>"
+            "Data: nflverse<br>"
+            "Chart: Sal Cacciatore<br>"
+            'www.sportsandmaybeotherthings.com'
+        ),
+        xref='paper', yref='paper',
+        x=0, y=0, yshift=-55,
+        xanchor='left', yanchor='top',
+        align='left',
+        showarrow=False,
+        font=dict(size=11, color='gray'),
+    )
+
+    return fig
 
 
 # Caching function for predictions
@@ -1181,6 +1240,35 @@ def game_review(game_id):
 
     #fantasy = rushers.set_index(['rusher_player_name']).merge(receiver_show.set_index(['receiver_player_name']),right_index=True,left_index=True,how='outer')
 # %%
+    rusher_fantasy = rushers.reset_index().rename(columns={'rusher_player_name':'player','xFPs':'rushing_xFP','fantasy_points':'rushing_PPR'})
+    receiver_fantasy = receiver_show.reset_index().rename(columns={'receiver_player_name':'player','xFPs':'receiver_xFP','fantasy_points':'receiving_PPR'})
+    fantasy_chart = pd.merge(rusher_fantasy,receiver_fantasy,on='player',how='outer')
+    fantasy_chart['posteam'] = fantasy_chart['posteam_x'].fillna(fantasy_chart['posteam_y'])
+    fantasy_chart = fantasy_chart.drop(columns=['posteam_x', 'posteam_y'])
+    fantasy_team1 = fantasy_chart['posteam'].unique()[0]
+    fantasy_team2 = fantasy_chart['posteam'].unique()[1]
+    fantasy_chart = fantasy_chart.fillna(0)
+
+    fantasy_chart['Expected fantasy points'] = fantasy_chart['rushing_xFP']+fantasy_chart['receiver_xFP']
+    fantasy_chart['Actual fantasy points'] = fantasy_chart['rushing_PPR']+fantasy_chart['receiving_PPR'] 
+
+    qb_exclusion = qb_show.reset_index()
+    qb_exclusion_list = qb_exclusion.loc[qb_exclusion['pass'] > 1, 'passer_player_name'].tolist()
+
+    fantasy_chart1 = fantasy_chart[
+        (fantasy_chart['posteam'] == fantasy_team1) &
+        (~fantasy_chart['player'].isin(qb_exclusion_list))
+    ][['player', 'posteam', 'Actual fantasy points', 'Expected fantasy points']].sort_values('Actual fantasy points', ascending=True)
+
+    fantasy_chart2 = fantasy_chart[
+        (fantasy_chart['posteam'] == fantasy_team2) &
+        (~fantasy_chart['player'].isin(qb_exclusion_list))
+    ][['player', 'posteam', 'Actual fantasy points', 'Expected fantasy points']].sort_values('Actual fantasy points', ascending=True)
+
+
+    fantasy_graph1 = fantasy_barbell(fantasy_chart1, fantasy_team1, week_int)
+    fantasy_graph2 = fantasy_barbell(fantasy_chart2, fantasy_team2, week_int)
+
     misc = data_all[data_all['game_id']==game_id]
     misc = misc[(misc['play_type']!='qb_kneel') & (misc['play_type']!='run') & (misc['play_type']!='pass')]
     misc_show = misc.groupby(['posteam','play_type']).agg({'epa':'sum'}).round(2)
@@ -1191,7 +1279,7 @@ def game_review(game_id):
 #
 
 
-    return st.write(game_db1), st.write(win_prob), st.write('Big Plays'),st.write(big_plays), st.write(turnover_plays), st.plotly_chart(points_fig), st.plotly_chart(fig2), st.plotly_chart(fig3), st.write(pass_show), st.plotly_chart(fig5), st.plotly_chart(home_pass), st.plotly_chart(away_pass), st.write(length_show),st.write(qb_show), st.write(rush_show), st.plotly_chart(host_rush), st.plotly_chart(visitor_rush), st.write(receiver_show), st.write(rushers), st.write(misc_show)
+    return st.write(game_db1), st.write(win_prob), st.write('Big Plays'),st.write(big_plays), st.write(turnover_plays), st.plotly_chart(points_fig), st.plotly_chart(fig2), st.plotly_chart(fig3), st.write(pass_show), st.plotly_chart(fig5), st.plotly_chart(home_pass), st.plotly_chart(away_pass), st.write(length_show),st.write(qb_show), st.write(rush_show), st.plotly_chart(host_rush), st.plotly_chart(visitor_rush), st.write(receiver_show), st.write(rushers), st.plotly_chart(fantasy_graph1, theme=None), st.plotly_chart(fantasy_graph2, theme=None),st.write("Excluded from xFP graphs:"),st.write(qb_exclusion_list),st.write(misc_show)
 # %%
 header = st.container()
 
@@ -1234,8 +1322,8 @@ def overall_creator(data, szn, offense, defense):
         'DAL': 'gray',
         'DEN': 'orange',
         'DET': 'gray',
-        'GB': 'green',
-        'HOU': 'black',
+        'GB': 'yellow',
+        'HOU': 'red',
         'IND': 'blue',
         'JAX': 'teal',
         'KC': 'red',
@@ -1342,8 +1430,8 @@ def pass_matchup(data, szn, offense, defense):
         'DAL': 'gray',
         'DEN': 'orange',
         'DET': 'gray',
-        'GB': 'green',
-        'HOU': 'black',
+        'GB': 'yellow',
+        'HOU': 'red',
         'IND': 'blue',
         'JAX': 'teal',
         'KC': 'red',
@@ -1445,8 +1533,8 @@ def rush_matchup(data, szn, offense, defense):
         'DAL': 'gray',
         'DEN': 'orange',
         'DET': 'gray',
-        'GB': 'green',
-        'HOU': 'black',
+        'GB': 'yellow',
+        'HOU': 'red',
         'IND': 'blue',
         'JAX': 'teal',
         'KC': 'red',
@@ -2492,7 +2580,7 @@ def main():
                         pass_data['throw'] = pass_data['complete_pass'] + pass_data['incomplete_pass'] + pass_data['interception']
                         pass_data['comp%'] = pass_data['complete_pass']/pass_data['throw']
                         pass_data['xc%'] = pass_data['cp']/pass_data['throw']
-                        pass_data['cpoe'] = pass_data['comp%']- pass_data['xc%']
+                        pass_data['cpoe'] = (pass_data['complete_pass']- pass_data['cp'])/pass_data['throw']
                         pass_data['aDOT'] = round(pass_data['air_yards']/pass_data['throw'],1)
                         pass_data['sack%'] = round(pass_data['sack']/pass_data['pass'],3)
                         pass_data['TD%'] = round(pass_data['pass_touchdown']/pass_data['throw'],3)
