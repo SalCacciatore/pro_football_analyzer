@@ -1252,7 +1252,7 @@ def game_review(game_id):
     fantasy_chart['Expected fantasy points'] = fantasy_chart['rushing_xFP']+fantasy_chart['receiver_xFP']
     fantasy_chart['Actual fantasy points'] = fantasy_chart['rushing_PPR']+fantasy_chart['receiving_PPR'] 
 
-    qb_exclusion = qb_show.reset_index()
+    qb_exclusion = qb_show.rename_axis('passer_player_name').reset_index()
     qb_exclusion_list = qb_exclusion.loc[qb_exclusion['pass'] > 1, 'passer_player_name'].tolist()
 
     fantasy_chart1 = fantasy_chart[
