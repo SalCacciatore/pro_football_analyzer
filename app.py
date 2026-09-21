@@ -466,6 +466,13 @@ def wp_graph(dataframe, game_id):
     return fig
 
 
+def pct_str(df, key, col):
+    rows = df[df.index == key]
+    if rows.empty:
+        return "N/A"
+    return str(int(rows[col].values[0] * 100)) + "th percentile"
+
+
 def game_review(game_id):
 #game_id = '2023_02_MIN_PHI'
 
@@ -665,7 +672,7 @@ def game_review(game_id):
                 redzone = pd.concat([redzone,ndf])
 
     
-    success_rate = overall_sr.merge(passing,right_index=True,left_index=True).merge(rushing,right_index=True,left_index=True).merge(early_down,right_index=True,left_index=True).merge(late_down,right_index=True,left_index=True).merge(short_yardage,right_index=True,left_index=True).merge(redzone, right_index=True,left_index=True)
+    success_rate = pd.concat([overall_sr, passing, rushing, early_down, late_down, short_yardage, redzone], axis=1).reindex(sorted([host, visitor])).fillna(0).rename_axis('posteam')
 
 # %%
     team_success_rate = success_rate.reset_index()
@@ -735,41 +742,41 @@ def game_review(game_id):
 
     success_all['sr_perc'] = success_all['success'].rank(pct=True).round(2)
 
-    sr_perc = str(int((success_all[success_all.index==(host, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+    sr_perc = pct_str(success_all, (host, game_id), 'sr_perc')
 
 
     success_early = data[data['down']<3].groupby(['posteam','game_id']).agg({'success':'mean'})
 
     success_early['sr_perc'] = success_early['success'].rank(pct=True).round(2)
 
-    sr_early_perc = str(int((success_early[success_early.index==(host, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+    sr_early_perc = pct_str(success_early, (host, game_id), 'sr_perc')
 
 
     success_late = data[data['down']>2].groupby(['posteam','game_id']).agg({'success':'mean'})
 
     success_late['sr_perc'] = success_late['success'].rank(pct=True).round(2)
 
-    sr_late_perc = str(int((success_late[success_late.index==(host, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+    sr_late_perc = pct_str(success_late, (host, game_id), 'sr_perc')
 
 
     success_short = data[data['ydstogo']<3].groupby(['posteam','game_id']).agg({'success':'mean'})
 
     success_short['sr_perc'] = success_short['success'].rank(pct=True).round(2)
 
-    sr_short_perc = str(int((success_short[success_short.index==(host, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+    sr_short_perc = pct_str(success_short, (host, game_id), 'sr_perc')
 
 
     success_pass = data[data['pass']==1].groupby(['posteam','game_id']).agg({'success':'mean'})
 
     success_pass['sr_perc'] = success_pass['success'].rank(pct=True).round(2)
 
-    sr_pass_perc = str(int((success_pass[success_pass.index==(host, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+    sr_pass_perc = pct_str(success_pass, (host, game_id), 'sr_perc')
 
     success_rush = data[data['rush']==1].groupby(['posteam','game_id']).agg({'success':'mean'})
 
     success_rush['sr_perc'] = success_rush['success'].rank(pct=True).round(2)
 
-    sr_rush_perc = str(int((success_rush[success_rush.index==(host, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+    sr_rush_perc = pct_str(success_rush, (host, game_id), 'sr_perc')
 
 
     success_red = data[data['yardline_100']<21].groupby(['posteam','game_id']).agg({'success':'mean'})
@@ -779,7 +786,7 @@ def game_review(game_id):
     if host not in list(success_red.reset_index()[success_red.reset_index()['game_id']==game_id]['posteam']):
         sr_red_perc = "No red zone attempts"
     else: 
-        sr_red_perc = str(int((success_red[success_red.index==(host, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+        sr_red_perc = pct_str(success_red, (host, game_id), 'sr_perc')
 
 # %%
     host_percentile_list = [sr_perc, sr_pass_perc,sr_rush_perc,sr_early_perc, sr_late_perc, sr_short_perc, sr_red_perc]
@@ -791,40 +798,40 @@ def game_review(game_id):
 
     success_all['sr_perc'] = success_all['success'].rank(pct=True).round(2)
 
-    sr_perc = str(int((success_all[success_all.index==(visitor, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+    sr_perc = pct_str(success_all, (visitor, game_id), 'sr_perc')
 
 
     success_early = data[data['down']<3].groupby(['posteam','game_id']).agg({'success':'mean'}) 
 
     success_early['sr_perc'] = success_early['success'].rank(pct=True).round(2)
 
-    sr_early_perc = str(int((success_early[success_early.index==(visitor, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+    sr_early_perc = pct_str(success_early, (visitor, game_id), 'sr_perc')
 
 
     success_late = data[data['down']>2].groupby(['posteam','game_id']).agg({'success':'mean'})
 
     success_late['sr_perc'] = success_late['success'].rank(pct=True).round(2)
 
-    sr_late_perc = str(int((success_late[success_late.index==(visitor, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+    sr_late_perc = pct_str(success_late, (visitor, game_id), 'sr_perc')
 
 
     success_short = data[data['ydstogo']<3].groupby(['posteam','game_id']).agg({'success':'mean'})
 
     success_short['sr_perc'] = success_short['success'].rank(pct=True).round(2)
 
-    sr_short_perc = str(int((success_short[success_short.index==(visitor, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+    sr_short_perc = pct_str(success_short, (visitor, game_id), 'sr_perc')
 
     success_pass = data[data['pass']==1].groupby(['posteam','game_id']).agg({'success':'mean'})
 
     success_pass['sr_perc'] = success_pass['success'].rank(pct=True).round(2)
 
-    sr_pass_perc = str(int((success_pass[success_pass.index==(visitor, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+    sr_pass_perc = pct_str(success_pass, (visitor, game_id), 'sr_perc')
 
     success_rush = data[data['rush']==1].groupby(['posteam','game_id']).agg({'success':'mean'})
 
     success_rush['sr_perc'] = success_rush['success'].rank(pct=True).round(2)
 
-    sr_rush_perc = str(int((success_rush[success_rush.index==(visitor, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+    sr_rush_perc = pct_str(success_rush, (visitor, game_id), 'sr_perc')
 
 
 
@@ -836,7 +843,7 @@ def game_review(game_id):
     if visitor not in list(success_red.reset_index()[success_red.reset_index()['game_id']==game_id]['posteam']):
         sr_red_perc = "No red zone attempts"
     else: 
-        sr_red_perc = str(int((success_red[success_red.index==(visitor, game_id)]['sr_perc']*100).values[0]))+"th percentile"
+        sr_red_perc = pct_str(success_red, (visitor, game_id), 'sr_perc')
 
 # %%
     visitor_percentile_list = [sr_perc, sr_pass_perc,sr_rush_perc,sr_early_perc, sr_late_perc, sr_short_perc, sr_red_perc]
@@ -933,7 +940,7 @@ def game_review(game_id):
     bar_width = 0.25
     r = np.arange(len(columns))
     line_values = [lg_success,lg_pass,lg_rush,lg_early,lg_late,lg_short,lg_red]
-    off_avg = [off_avg_sr,lg_pass,lg_rush,off_early,off_late,off_short,off_red]
+    off_avg = [off_avg_sr,off_pass,off_pass,off_early,off_late,off_short,off_red]
     def_avg = [def_avg_sr,def_pass,def_rush,def_early,def_late,def_short,def_red]
 
     fig3 = go.Figure()
