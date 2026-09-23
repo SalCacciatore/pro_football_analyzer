@@ -1684,7 +1684,10 @@ def get_off_stats(team,data,last_or_this,szn):
     
     df = pd.DataFrame({'Stat': stats, 'Value': values, 'Rank': ranks})
     df['Value'] = df['Value'].round(3)
-    df['Rank'] = df['Rank'].astype(int)
+    _rank = pd.to_numeric(df['Rank'], errors='coerce').replace([float('inf'), float('-inf')], float('nan'))
+    if _rank.isna().any():
+        print(f"[rank NaN] {team}: {df.loc[_rank.isna(), 'Stat'].tolist()}")
+    df['Rank'] = _rank.round().astype('Int64')
 
 
     team_passing = team_data.groupby('passer_player_name').agg({'pass':'sum','epa':['sum','mean'],'success':'mean','air_yards':'mean', 'cpoe':'mean','touchdown':['sum','mean'],'interception':['sum','mean']})
@@ -1789,7 +1792,10 @@ def get_def_stats(team,data):
     
     df = pd.DataFrame({'Stat': stats, 'Value': values, 'Rank': ranks})
     df['Value'] = df['Value'].round(3)
-    df['Rank'] = df['Rank'].astype(int)
+    _rank = pd.to_numeric(df['Rank'], errors='coerce').replace([float('inf'), float('-inf')], float('nan'))
+    if _rank.isna().any():
+        print(f"[rank NaN] {team}: {df.loc[_rank.isna(), 'Stat'].tolist()}")
+    df['Rank'] = _rank.round().astype('Int64')
 
     return df
 
