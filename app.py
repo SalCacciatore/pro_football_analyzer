@@ -1318,7 +1318,7 @@ def overall_creator(data, szn, offense, defense):
 
 # Create a custom color map for NFL teams
     team_colors = {
-        'ARI': 'red',
+        'ARI': 'black',
         'ATL': 'black',
         'BAL': 'purple',
         'BUF': 'blue',
@@ -1342,8 +1342,8 @@ def overall_creator(data, szn, offense, defense):
         'NO': 'black',
         'NYG': 'blue',
         'NYJ': 'green',
-        'LV': 'black',
-        'PHI': 'black',
+        'LV': 'gray',
+        'PHI': 'green',
         'PIT': 'yellow',
         'SEA': 'blue',
         'SF': 'red',
@@ -1426,7 +1426,7 @@ def pass_matchup(data, szn, offense, defense):
 
 # Create a custom color map for NFL teams
     team_colors = {
-        'ARI': 'red',
+        'ARI': 'black',
         'ATL': 'black',
         'BAL': 'purple',
         'BUF': 'blue',
@@ -1450,8 +1450,8 @@ def pass_matchup(data, szn, offense, defense):
         'NO': 'black',
         'NYG': 'blue',
         'NYJ': 'green',
-        'LV': 'black',
-        'PHI': 'black',
+        'LV': 'gray',
+        'PHI': 'green',
         'PIT': 'yellow',
         'SEA': 'blue',
         'SF': 'red',
@@ -1529,7 +1529,7 @@ def rush_matchup(data, szn, offense, defense):
 
 # Create a custom color map for NFL teams
     team_colors = {
-        'ARI': 'red',
+        'ARI': 'black',
         'ATL': 'black',
         'BAL': 'purple',
         'BUF': 'blue',
@@ -1553,8 +1553,8 @@ def rush_matchup(data, szn, offense, defense):
         'NO': 'black',
         'NYG': 'blue',
         'NYJ': 'green',
-        'LV': 'black',
-        'PHI': 'black',
+        'LV': 'gray',
+        'PHI': 'green',
         'PIT': 'yellow',
         'SEA': 'blue',
         'SF': 'red',
@@ -1883,7 +1883,8 @@ def get_team_stats(team, year):
         )
 
     # Set layout properties
-    fig.update_layout(title_text=f"{team} Offense -- {int(previous)} to {int(year)}",title_x=0.5)
+    fig.update_layout(title_text=f"{team} Offense -- {int(previous)} to {int(year)}",title_x=0.5,
+        xaxis_title='Rank')
 
 # Show plot
     df = year_over_year_def
@@ -1921,7 +1922,8 @@ def get_team_stats(team, year):
         )
 
     # Set layout properties
-    def_fig.update_layout(title_text=f"{team} Defense -- {int(previous)} to {int(year)}",title_x=0.5)
+    def_fig.update_layout(title_text=f"{team} Defense -- {int(previous)} to {int(year)}",title_x=0.5, 
+        xaxis_title='Rank')
 
 
 
