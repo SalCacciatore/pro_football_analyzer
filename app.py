@@ -92,7 +92,7 @@ def fantasy_barbell(df, team, week_int):
     fig.add_annotation(
         text=(
             "Point per reception scoring<br>"
-            "Rushing and receiving only<br>"
+            "Rushing and receiving plays from scrimmage only<br>"
             "Expected fantasy points combine Sal Cacciatore's xYards and xTD model output<br>"
             "with nflverse's completion probability model output<br>"
             "Data: nflverse<br>"
