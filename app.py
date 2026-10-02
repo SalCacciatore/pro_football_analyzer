@@ -902,7 +902,7 @@ def game_review(game_id):
     fig2.update_layout(barmode='group', title_text=f"{host} Offense Week {game['week'].max()} -- Success Rate")
     fig2.update_yaxes(range=[0.2, 0.7])
 
-    footnote = "Blue line: NFL average (2025 season)<br>Green line: Offensive team average (2025 season)<br>Red line: Defensive team average (2025 season)<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
+    footnote = f"Blue line: NFL average ({baseline_szn} season)<br>Green line: Offensive team average ({baseline_szn} season)<br>Red line: Defensive team average ({baseline_szn} season)<br>Percentile ranks compare single game performance to all games since 203<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
     fig2.add_annotation(
         text=footnote,
         xref="paper", yref="paper",
@@ -969,7 +969,8 @@ def game_review(game_id):
 
     fig3.update_layout(barmode='group', title_text=f"{visitor} Offense Week {game['week'].max()} -- Success Rate")
     fig3.update_yaxes(range=[0.2, 0.7])
-    footnote = "Blue line: NFL average (2025 season)<br>Green line: Offensive team average (2025 season)<br>Red line: Defensive team average (2025 season)<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
+    footnote = f"Blue line: NFL average ({baseline_szn} season)<br>Green line: Offensive team average ({baseline_szn} season)<br>Red line: Defensive team average ({baseline_szn} season)<br>Percentile ranks compare single game performance to all games since 203<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
+
     fig3.add_annotation(
         text=footnote,
         xref="paper", yref="paper",
@@ -1319,7 +1320,7 @@ def overall_creator(data, szn, offense, defense):
 # Create a custom color map for NFL teams
     team_colors = {
         'ARI': 'black',
-        'ATL': 'black',
+        'ATL': 'red',
         'BAL': 'purple',
         'BUF': 'blue',
         'CAR': 'blue',
@@ -1329,7 +1330,7 @@ def overall_creator(data, szn, offense, defense):
         'DAL': 'gray',
         'DEN': 'orange',
         'DET': 'gray',
-        'GB': 'yellow',
+        'GB': 'green',
         'HOU': 'red',
         'IND': 'blue',
         'JAX': 'teal',
@@ -1427,7 +1428,7 @@ def pass_matchup(data, szn, offense, defense):
 # Create a custom color map for NFL teams
     team_colors = {
         'ARI': 'black',
-        'ATL': 'black',
+        'ATL': 'red',
         'BAL': 'purple',
         'BUF': 'blue',
         'CAR': 'blue',
@@ -1437,7 +1438,7 @@ def pass_matchup(data, szn, offense, defense):
         'DAL': 'gray',
         'DEN': 'orange',
         'DET': 'gray',
-        'GB': 'yellow',
+        'GB': 'green',
         'HOU': 'red',
         'IND': 'blue',
         'JAX': 'teal',
@@ -1530,7 +1531,7 @@ def rush_matchup(data, szn, offense, defense):
 # Create a custom color map for NFL teams
     team_colors = {
         'ARI': 'black',
-        'ATL': 'black',
+        'ATL': 'red',
         'BAL': 'purple',
         'BUF': 'blue',
         'CAR': 'blue',
@@ -1540,7 +1541,7 @@ def rush_matchup(data, szn, offense, defense):
         'DAL': 'gray',
         'DEN': 'orange',
         'DET': 'gray',
-        'GB': 'yellow',
+        'GB': 'green',
         'HOU': 'red',
         'IND': 'blue',
         'JAX': 'teal',
