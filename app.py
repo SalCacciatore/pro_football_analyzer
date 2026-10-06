@@ -45,6 +45,13 @@ def load_models():
     }
 
 
+def ordinal(n):
+    if 10 <= n % 100 <= 13:
+        suffix = "th"
+    else:
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
+
 
 
 
@@ -470,7 +477,7 @@ def pct_str(df, key, col):
     rows = df[df.index == key]
     if rows.empty:
         return "N/A"
-    return str(int(rows[col].values[0] * 100)) + "th percentile"
+    return ordinal(int(rows[col].values[0] * 100)) + " percentile"
 
 
 def game_review(game_id):
@@ -618,13 +625,13 @@ def game_review(game_id):
 
 # %%
     points_df = pd.DataFrame()
-    points_df['difference (home team)'] = ['epa_ST/penalties','epa_red_zone','epa_late_downs','epa_turnovers','epa_all','points_for']
+    points_df['difference (home team)'] = ['epa_ST/misc. penalties','epa_red_zone','epa_late_downs','epa_turnovers','epa_all','points_for']
     points_df['epa'] = points_list
 
 
 # Assuming points_df is your DataFrame
-    points_fig = px.bar(points_df, x='epa', y='difference (home team)', orientation='h')
-    footnote = "Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
+    points_fig = px.bar(points_df, x='epa', y=f'difference ({host})', orientation='h')
+    footnote = "Rush and passes plays only except for the ST/misc. penalties row<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
     points_fig.add_annotation(
         text=footnote,
         xref="paper", yref="paper",
