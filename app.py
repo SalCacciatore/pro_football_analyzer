@@ -584,7 +584,7 @@ def game_review(game_id):
                     to_lost = to_df['epa'].values[0] * -1
         if category == 'other':
             misc = data_all[data_all['game_id']==game_id]
-            misc = misc[(misc['play_type']!='qb_kneel') & (misc['play_type']!='run') & (misc['play_type']!='pass')]
+            misc = misc[(misc['play_type']!='qb_kneel') & (misc['play_type']!='run') & (misc['play_type']!='pass')& (misc['play_type']!='no_play')&(misc['play_type']!='qb_spike')]
             to_df = misc.groupby('posteam').agg({'epa':'sum'}).round(2)
             to_df = to_df.reset_index()
             if len(to_df['posteam'])==2:
@@ -625,13 +625,15 @@ def game_review(game_id):
 
 # %%
     points_df = pd.DataFrame()
-    points_df['difference (home team)'] = ['epa_ST/misc. penalties','epa_red_zone','epa_late_downs','epa_turnovers','epa_all','points_for']
+    points_df['difference (home team)'] = ['epa_sp_teams','epa_red_zone','epa_late_downs','epa_turnovers','epa_offense','points_for']
     points_df['epa'] = points_list
 
 
 # Assuming points_df is your DataFrame
-    points_fig = px.bar(points_df, x='epa', y=f'difference ({host})', orientation='h')
-    footnote = "Rush and passes plays only except for the ST/misc. penalties row<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
+    #points_fig = px.bar(points_df, x='epa', y=f'difference ({host})', orientation='h')
+    points_fig = px.bar(points_df, x='epa', y='difference (home team)', orientation='h')
+
+    footnote = "Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
     points_fig.add_annotation(
         text=footnote,
         xref="paper", yref="paper",
@@ -642,8 +644,13 @@ def game_review(game_id):
         font=dict(size=11, color="gray"),
     )
 
-    points_fig.update_layout(margin=dict(b=130))
-    #fig.show()
+    points_fig.update_layout(
+        xaxis_title=f"{host} Net Advantage",
+        yaxis_title=None,
+        margin=dict(b=130)
+    )
+
+
 
 
 
