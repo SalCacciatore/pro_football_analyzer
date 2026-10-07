@@ -1197,7 +1197,7 @@ def game_review(game_id):
     length_df = length_df[['short_pass','short_epa','short_success','short_cpoe','medium_pass','medium_epa','medium_success','medium_cpoe','deep_pass','deep_epa','deep_success','deep_cpoe']]
 
 # %%
-    pass_df = data[data['air_yards'].isna()==False]
+    pass_df = data[(data['air_yards'].isna()==False)&(data['season']==baseline_szn)]
 
     short_list = [round(pass_df['short_pass'].mean()*100,1).astype(str)+"%"]
 
