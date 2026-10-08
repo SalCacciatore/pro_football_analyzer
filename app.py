@@ -1333,7 +1333,7 @@ def overall_creator(data, szn, offense, defense):
 
 # Create a custom color map for NFL teams
     team_colors = {
-        'ARI': 'black',
+        'ARI': 'red',
         'ATL': 'red',
         'BAL': 'purple',
         'BUF': 'blue',
@@ -1441,7 +1441,7 @@ def pass_matchup(data, szn, offense, defense):
 
 # Create a custom color map for NFL teams
     team_colors = {
-        'ARI': 'black',
+        'ARI': 'red',
         'ATL': 'red',
         'BAL': 'purple',
         'BUF': 'blue',
@@ -1544,7 +1544,7 @@ def rush_matchup(data, szn, offense, defense):
 
 # Create a custom color map for NFL teams
     team_colors = {
-        'ARI': 'black',
+        'ARI': 'red',
         'ATL': 'red',
         'BAL': 'purple',
         'BUF': 'blue',
