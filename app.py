@@ -916,7 +916,7 @@ def game_review(game_id):
     fig2.update_layout(barmode='group', title_text=f"{host} Offense Week {game['week'].max()} -- Success Rate")
     fig2.update_yaxes(range=[0.2, 0.7])
 
-    footnote = f"Blue line: NFL average ({baseline_szn} season)<br>Green line: Offensive team average ({baseline_szn} season)<br>Red line: Defensive team average ({baseline_szn} season)<br>Percentile ranks compare single game performance to all games since 203<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
+    footnote = f"Blue line: NFL average ({baseline_szn} season)<br>Green line: Offensive team average ({baseline_szn} season)<br>Red line: Defensive team average ({baseline_szn} season)<br>Percentile ranks compare single game performance to all games since 2023<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
     fig2.add_annotation(
         text=footnote,
         xref="paper", yref="paper",
@@ -954,7 +954,7 @@ def game_review(game_id):
     bar_width = 0.25
     r = np.arange(len(columns))
     line_values = [lg_success,lg_pass,lg_rush,lg_early,lg_late,lg_short,lg_red]
-    off_avg = [off_avg_sr,off_pass,off_pass,off_early,off_late,off_short,off_red]
+    off_avg = [off_avg_sr,off_pass,off_rush,off_early,off_late,off_short,off_red]
     def_avg = [def_avg_sr,def_pass,def_rush,def_early,def_late,def_short,def_red]
 
     fig3 = go.Figure()
@@ -983,7 +983,7 @@ def game_review(game_id):
 
     fig3.update_layout(barmode='group', title_text=f"{visitor} Offense Week {game['week'].max()} -- Success Rate")
     fig3.update_yaxes(range=[0.2, 0.7])
-    footnote = f"Blue line: NFL average ({baseline_szn} season)<br>Green line: Offensive team average ({baseline_szn} season)<br>Red line: Defensive team average ({baseline_szn} season)<br>Percentile ranks compare single game performance to all games since 203<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
+    footnote = f"Blue line: NFL average ({baseline_szn} season)<br>Green line: Offensive team average ({baseline_szn} season)<br>Red line: Defensive team average ({baseline_szn} season)<br>Percentile ranks compare single game performance to all games since 2023<br>Data: nflverse<br>Chart: Sal Cacciatore<br>www.sportsandmaybeotherthings.com"
 
     fig3.add_annotation(
         text=footnote,
