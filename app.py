@@ -582,6 +582,7 @@ def game_review(game_id):
                     to_lost = to_df['epa'].values[0]
                 if to_df['posteam'][0] == visitor:
                     to_lost = to_df['epa'].values[0] * -1
+                return to_lost
         if category == 'other':
             misc = data_all[data_all['game_id']==game_id]
             misc = misc[(misc['play_type']!='qb_kneel') & (misc['play_type']!='run') & (misc['play_type']!='pass')& (misc['play_type']!='no_play')&(misc['play_type']!='qb_spike')]
@@ -596,9 +597,11 @@ def game_review(game_id):
                     to_lost = to_df['epa'].values[0]
                 if to_df['posteam'][0] == visitor:
                     to_lost = to_df['epa'].values[0] * -1
+                return to_lost
+        # neither team had a play in this category
+        return 0
 
 
-        
 
 
 
@@ -678,12 +681,12 @@ def game_review(game_id):
         for team in [host,visitor]:
             if team not in list(redzone.index):
                 t_list.append(team)
-                ndf = pd.DataFrame()
-                ndf['posteam'] = t_list
-                ndf['red zone'] = 0
-                ndf.set_index('posteam',inplace=True)
-            
-                redzone = pd.concat([redzone,ndf])
+        ndf = pd.DataFrame()
+        ndf['posteam'] = t_list
+        ndf['red zone'] = 0
+        ndf.set_index('posteam',inplace=True)
+
+        redzone = pd.concat([redzone,ndf])
 
     
     success_rate = pd.concat([overall_sr, passing, rushing, early_down, late_down, short_yardage, redzone], axis=1).reindex(sorted([host, visitor])).fillna(0).rename_axis('posteam')
@@ -2100,7 +2103,8 @@ def receiver_simulator(chosen_team, spread, total, excluded_receiver1, excluded_
 
     team_period = current_szn[(current_szn['posteam']==chosen_team)&(current_szn['week']>=starting_week)].groupby('receiver_player_name').agg({'pass':'sum','xYards':'sum','game_id':'nunique','yards_gained':'sum','target':'sum'})
 
-    period_targets_per_game = team_period['target'].sum()/team_period['game_id'].nunique()
+    period_games = current_szn[(current_szn['posteam']==chosen_team)&(current_szn['week']>=starting_week)]['game_id'].nunique()
+    period_targets_per_game = team_period['target'].sum()/period_games
 
     team_targets = team_period[team_period.index!=excluded_receiver1]
 
@@ -2605,8 +2609,7 @@ def main():
                         scramble_data['player_id'] = scramble_data['rusher_player_name']+"_"+scramble_data['posteam']
                         scramble_data = scramble_data.drop(columns=['posteam','rusher_player_name'])
                         
-                        
-                        pass_data = pass_data[pass_data['pass']>=minimum_volume]
+
                         pass_data['throw'] = pass_data['complete_pass'] + pass_data['incomplete_pass'] + pass_data['interception']
                         pass_data['comp%'] = pass_data['complete_pass']/pass_data['throw']
                         pass_data['xc%'] = pass_data['cp']/pass_data['throw']
@@ -2619,7 +2622,12 @@ def main():
                         pass_data[['comp%','cpoe']] = pass_data[['comp%','cpoe']].round(3)
                         pass_data = pass_data.reset_index()
                         pass_data['player_id'] = pass_data['passer_player_name']+"_"+pass_data['posteam']
-                        pass_data = pass_data.merge(scramble_data,on='player_id',how='outer').fillna(0)
+                        pass_data = pass_data.merge(scramble_data,on='player_id',how='outer')
+                        # scramble-only players have no passer row, so recover name/team from player_id
+                        pass_data['passer_player_name'] = pass_data['passer_player_name'].fillna(pass_data['player_id'].str.rsplit("_",n=1).str[0])
+                        pass_data['posteam'] = pass_data['posteam'].fillna(pass_data['player_id'].str.rsplit("_",n=1).str[1])
+                        pass_data = pass_data.fillna(0)
+                        pass_data = pass_data[pass_data['pass']>=minimum_volume]
                         pass_data['dropback'] = pass_data['pass']+pass_data['scramble']
                         pass_data['dropback_epa'] = round(pass_data['pass_epa'] + pass_data['scramble_epa'],1)
                         pass_data['scramble_epa'] = pass_data['scramble_epa'].round(1)
