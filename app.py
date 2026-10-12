@@ -276,7 +276,7 @@ def process_data(data, yardage_model, touchdown_model,szn):
             throws = offense[['complete_pass', 'incomplete_pass', 'interception']].sum().sum()
             team_air_yards = offense['air_yards'].sum()
 
-            receivers = offense.groupby(['receiver_player_name', 'posteam', 'game_id', 'week'])[['pass', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'touchdown', 'xTDs', 'end_zone_target','fumble_lost','yards_after_catch','xyac_mean_yardage']].sum()
+            receivers = offense.groupby(['receiver_player_name', 'posteam', 'game_id', 'week'])[['pass', 'fantasy_points', 'xFPs', 'complete_pass', 'cp', 'yards_gained', 'xYards', 'air_yards', 'pass_touchdown', 'xTDs', 'end_zone_target','fumble_lost','yards_after_catch','xyac_mean_yardage']].sum().rename(columns={'pass_touchdown':'touchdown'})
             receivers['team_attempts'] = throws
             receivers['team_air_yards'] = team_air_yards
             
@@ -317,7 +317,7 @@ def process_rush_data(data, yardage_model, touchdown_model,szn):
 
             carries = offense[offense['rusher_player_name'].isna() == False]['rush'].sum()
 
-            rushers = offense.groupby(['rusher_player_name', 'posteam', 'game_id', 'week'])[['rush', 'fantasy_points', 'xFPs','yards_gained', 'xYards', 'touchdown', 'xTDs', 'goal_to_go','fumble_lost','epa','success','20+_play']].sum()
+            rushers = offense.groupby(['rusher_player_name', 'posteam', 'game_id', 'week'])[['rush', 'fantasy_points', 'xFPs','yards_gained', 'xYards', 'rush_touchdown', 'xTDs', 'goal_to_go','fumble_lost','epa','success','20+_play']].sum().rename(columns={'rush_touchdown':'touchdown'})
             rushers['team_attempts'] = carries
             
             rushers_list.append(rushers)
@@ -398,7 +398,7 @@ def preprocess_data(data):
         'fantasy_points': (
             data['complete_pass'] * 1 +  # 1 point per completion
             data['fumble_lost'] * -2 +
-            data['touchdown'] * 6 +       # 6 points per touchdown
+            (data['pass_touchdown'].fillna(0) + data['rush_touchdown'].fillna(0)) * 6 +  # 6 points per offensive touchdown (excludes pick-sixes / fumble return TDs)
             data['yards_gained'] * 0.1     # 0.1 points per yard gained
         ),
         'end_zone_target': (data['yardline_100'] - data['air_yards']) <= 0,
@@ -1107,10 +1107,10 @@ def game_review(game_id):
         return fig4
 
 # %%
-    scramble_df = game[(game['pass']==1) & (game['rusher_player_name']!=False)].groupby('rusher_player_name').agg({'pass':'sum','epa':'sum','touchdown':'sum','turnover':'sum'}).round(2)
+    scramble_df = game[(game['pass']==1) & (game['rusher_player_name']!=False)].groupby('rusher_player_name').agg({'pass':'sum','epa':'sum','rush_touchdown':'sum','turnover':'sum'}).round(2)
 
 
-    scramble_df.rename(columns={'pass':'scrambles','epa':'scramble_epa','touchdown':'scramble_TD','turnover':'scramble_fumble'},inplace=True)
+    scramble_df.rename(columns={'pass':'scrambles','epa':'scramble_epa','rush_touchdown':'scramble_TD','turnover':'scramble_fumble'},inplace=True)
 
 # %%    
     throws_df = game[(game['complete_pass']==1)|(game['incomplete_pass']==1)].groupby('posteam')[['epa']].sum().rename(columns={'epa':'throw_epa (w/o interceptions)'})
@@ -1708,7 +1708,7 @@ def get_off_stats(team,data,last_or_this,szn):
     df['Rank'] = _rank.round().astype('Int64')
 
 
-    team_passing = team_data.groupby('passer_player_name').agg({'pass':'sum','epa':['sum','mean'],'success':'mean','air_yards':'mean', 'cpoe':'mean','touchdown':['sum','mean'],'interception':['sum','mean']})
+    team_passing = team_data.groupby('passer_player_name').agg({'pass':'sum','epa':['sum','mean'],'success':'mean','air_yards':'mean', 'cpoe':'mean','pass_touchdown':['sum','mean'],'interception':['sum','mean']})
     #team_rushing = team_data.groupby('rusher_player_name').agg({'rush':'sum','epa':['sum','mean'],'success':'mean','yards_gained':['sum','mean']})
     
     if last_or_this == 'this':
